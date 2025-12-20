@@ -12,6 +12,15 @@ export interface ShapeInput {
   default?: number
 }
 
+export interface AdditionalResult {
+  id: string
+  label: string
+  formula: string
+  /** Unit suffix (e.g., 'units²', 'units') */
+  unit: string
+  calculate: (values: Record<string, number>) => number
+}
+
 export interface ShapeDefinition {
   id: string
   name: string
@@ -23,6 +32,8 @@ export interface ShapeDefinition {
   formula: string
   /** Human-readable formula explanation */
   formulaExplanation: string
+  /** Additional calculated values (surface area, diagonals, etc.) */
+  additionalResults?: AdditionalResult[]
 }
 
 export interface GeometryCalculatorConfig {

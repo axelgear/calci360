@@ -27,7 +27,7 @@ import {
 } from './converters'
 
 /* Import geometry calculators */
-import { areaCalculator } from './geometry'
+import { areaCalculator, volumeCalculator } from './geometry'
 
 /**
  * Registry of all available calculators
@@ -36,6 +36,7 @@ import { areaCalculator } from './geometry'
 export const calculators: Record<string, CalculatorConfig> = {
   /* ============ Geometry Calculators ============ */
   'area-calculator': areaCalculator,
+  'volume-calculator': volumeCalculator,
   
   /* ============ Unit Converters ============ */
   

@@ -57,7 +57,7 @@ const categories = computed<CalculatorCategory[]>(() => {
   
   const categoryMeta: Record<string, { icon: string; description: string }> = {
     'Unit Conversion': {
-      icon: 'swap_horiz',
+    icon: 'swap_horiz',
       description: 'Convert between different units of measurement with precision and ease',
     },
     'Geometry': {

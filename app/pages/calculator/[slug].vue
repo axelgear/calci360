@@ -29,6 +29,12 @@ const geometryConfig = computed(() =>
   isGeometry.value ? (config.value as GeometryCalculatorConfig) : null
 )
 
+/* Check if it's a volume calculator (3D) vs area calculator (2D) */
+const isVolumeCalculator = computed(() => 
+  geometryConfig.value?.resultLabel === 'Volume' || 
+  geometryConfig.value?.resultUnit?.includes('³')
+)
+
 /* SEO */
 useSeoMeta({
   title: () => config.value?.name ?? 'Calculator',
@@ -88,7 +94,10 @@ definePageMeta({
         <!-- Unit Converter -->
         <CalculatorConverterWidget v-if="isConverter" :config="config" />
         
-        <!-- Geometry Calculator -->
+        <!-- Volume Calculator (3D) -->
+        <CalculatorVolumeWidget v-else-if="isGeometry && geometryConfig && isVolumeCalculator" :config="geometryConfig" />
+        
+        <!-- Geometry Calculator (2D - Area) -->
         <CalculatorGeometryWidget v-else-if="isGeometry && geometryConfig" :config="geometryConfig" />
         
         <!-- Placeholder for other calculators -->
