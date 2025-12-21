@@ -49,6 +49,7 @@ import { metalWeightCalculator } from './metal-weight'
 
 /* Import HVAC calculators */
 import { hvacDuctCalculator } from './hvac'
+import { ductSizingCalculator } from './hvac/duct-sizing'
 
 /**
  * Registry of all available calculators
@@ -64,6 +65,7 @@ export const calculators: Record<string, CalculatorConfig> = {
   
   /* ============ HVAC Calculators ============ */
   'duct-heat-loss-calculator': hvacDuctCalculator,
+  'duct-sizing-calculator': ductSizingCalculator,
   
   /* ============ Unit Converters ============ */
   
