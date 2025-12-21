@@ -239,14 +239,18 @@ async function copyShareUrl() {
   }
 }
 
-/* Load state from URL on mount */
+/* SSR-safe route access */
+const route = useRoute()
+
+/* Load state from URL on mount - client-side only */
 onMounted(() => {
-  if (typeof window !== 'undefined') {
-    const urlParams = new URLSearchParams(window.location.search)
-    const stateParam = urlParams.get('state')
-    if (stateParam) {
+  /* Use Nuxt's route which is SSR-safe */
+  const stateParam = route.query.state as string | undefined
+  if (stateParam) {
+    /* Use nextTick to ensure Vue Flow is fully initialized */
+    nextTick(() => {
       decodeSystemState(stateParam)
-    }
+    })
   }
 })
 
@@ -519,23 +523,31 @@ const segmentRows = computed<TableRow[]>(() =>
         </button>
       </div>
 
-      <!-- Vue Flow Visual Editor -->
-      <DuctFlowEditor
-        :nodes="system.nodes"
-        :segments="system.segments"
-        :selected-node-id="selectedNodeId"
-        :selected-segment-id="selectedSegmentId"
-        :warnings="results?.warnings"
-        :max-velocity="system.maxVelocity"
-        v-model:duct-shape="selectedDuctShape"
-        @select-node="selectNode"
-        @select-segment="selectSegment"
-        @add-node="handleFlowAddNode"
-        @update-node-position="handleFlowUpdatePosition"
-        @connect="handleFlowConnect"
-        @remove-edge="handleFlowRemoveEdge"
-        @update-segment-length="handleUpdateSegmentLength"
-      />
+      <!-- Vue Flow Visual Editor - Client Only (requires browser APIs) -->
+      <ClientOnly>
+        <DuctFlowEditor
+          :nodes="system.nodes"
+          :segments="system.segments"
+          :selected-node-id="selectedNodeId"
+          :selected-segment-id="selectedSegmentId"
+          :warnings="results?.warnings"
+          :max-velocity="system.maxVelocity"
+          v-model:duct-shape="selectedDuctShape"
+          @select-node="selectNode"
+          @select-segment="selectSegment"
+          @add-node="handleFlowAddNode"
+          @update-node-position="handleFlowUpdatePosition"
+          @connect="handleFlowConnect"
+          @remove-edge="handleFlowRemoveEdge"
+          @update-segment-length="handleUpdateSegmentLength"
+        />
+        <template #fallback>
+          <div class="flow-loading">
+            <span class="material-icons spinning">sync</span>
+            {{ t('Loading editor...') }}
+          </div>
+        </template>
+      </ClientOnly>
 
       <!-- Main content: Tree view + Properties -->
       <div class="design-content">
@@ -1022,7 +1034,7 @@ const segmentRows = computed<TableRow[]>(() =>
         </div>
         <div class="share-note">
           <span class="material-icons">info</span>
-          <span>{{ t('No database required - the layout is encoded in the URL') }}</span>
+          
         </div>
       </div>
       <template #footer>
@@ -1182,6 +1194,29 @@ const segmentRows = computed<TableRow[]>(() =>
       font-size: 18px;
     }
   }
+}
+
+/* Loading state for ClientOnly fallback */
+.flow-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 500px;
+  background: rgb(var(--accent-500-rgb) / 5%);
+  border: 1px solid rgb(var(--accent-500-rgb) / 10%);
+  border-radius: 0.75rem;
+  color: var(--neutral);
+  font-size: 0.9rem;
+
+  .spinning {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .design-content {
