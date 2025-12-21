@@ -345,41 +345,7 @@ export const metalProfiles: ProfileDefinition[] = [
     formulaDisplay: 'V = (wt + 2h + 2wb) × t × L',
     formulaExplanation: 'Hat-shaped profile: top + two sides + two bottom flanges.',
   },
-  {
-    id: 'sigma-section',
-    name: 'Sigma Section (Σ)',
-    icon: 'functions',
-    category: 'structural',
-    inputs: [
-      { id: 'height', label: 'Height', symbol: 'h', default: 0.2, min: 0.001, step: 0.001 },
-      { id: 'flangeWidth', label: 'Flange Width', symbol: 'b', default: 0.07, min: 0.001, step: 0.001 },
-      { id: 'thickness', label: 'Thickness', symbol: 't', default: 0.002, min: 0.0001, step: 0.0001 },
-      { id: 'foldDepth', label: 'Fold Depth', symbol: 'd', default: 0.02, min: 0.001, step: 0.001, helpText: 'Depth of the inward folds' },
-      { id: 'lipHeight', label: 'Lip Height', symbol: 'c', default: 0.02, min: 0, step: 0.001 },
-      lengthInput,
-    ],
-    volumeFormula: '(height + 2 * flangeWidth + 2 * lipHeight + 4 * foldDepth) * thickness * length',
-    formulaDisplay: 'V = (h + 2b + 2c + 4d) × t × L',
-    formulaExplanation: 'Sigma-shaped cold-formed purlin with edge stiffeners.',
-  },
-  {
-    id: 'uneven-sigma',
-    name: 'Uneven Sigma Section',
-    icon: 'format_strikethrough',
-    category: 'structural',
-    inputs: [
-      { id: 'height', label: 'Height', symbol: 'h', default: 0.25, min: 0.001, step: 0.001 },
-      { id: 'topFlangeWidth', label: 'Top Flange Width', symbol: 'bt', default: 0.08, min: 0.001, step: 0.001 },
-      { id: 'bottomFlangeWidth', label: 'Bottom Flange Width', symbol: 'bb', default: 0.06, min: 0.001, step: 0.001 },
-      { id: 'thickness', label: 'Thickness', symbol: 't', default: 0.002, min: 0.0001, step: 0.0001 },
-      { id: 'foldDepth', label: 'Fold Depth', symbol: 'd', default: 0.02, min: 0.001, step: 0.001 },
-      { id: 'lipHeight', label: 'Lip Height', symbol: 'c', default: 0.02, min: 0, step: 0.001 },
-      lengthInput,
-    ],
-    volumeFormula: '(height + topFlangeWidth + bottomFlangeWidth + 2 * lipHeight + 4 * foldDepth) * thickness * length',
-    formulaDisplay: 'V = (h + bt + bb + 2c + 4d) × t × L',
-    formulaExplanation: 'Asymmetric sigma section with different top/bottom flange widths.',
-  },
+
 ]
 
 /* Get profile by ID */

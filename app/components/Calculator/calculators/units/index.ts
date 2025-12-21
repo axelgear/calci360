@@ -110,6 +110,20 @@ export {
   defaultInductanceUnit,
 } from './electrical'
 
+/* Temperature - Base unit: Kelvin (special non-linear conversions) */
+export {
+  CELSIUS_OFFSET,
+  FAHRENHEIT_OFFSET,
+  toKelvin,
+  fromKelvin,
+  convertTemperature,
+  convertTempDelta,
+  type TemperatureUnitOption,
+  temperatureUnitsCommon,
+  temperatureUnitsFull,
+  defaultTemperatureUnit,
+} from './temperature'
+
 /* Physical Constants */
 export * from './constants'
 

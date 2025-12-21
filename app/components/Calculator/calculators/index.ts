@@ -47,6 +47,9 @@ import { areaCalculator, volumeCalculator } from './geometry'
 /* Import engineering calculators */
 import { metalWeightCalculator } from './metal-weight'
 
+/* Import HVAC calculators */
+import { hvacDuctCalculator } from './hvac'
+
 /**
  * Registry of all available calculators
  * Key is the URL slug, value is the calculator configuration
@@ -58,6 +61,9 @@ export const calculators: Record<string, CalculatorConfig> = {
   
   /* ============ Engineering Calculators ============ */
   'metal-weight-calculator': metalWeightCalculator,
+  
+  /* ============ HVAC Calculators ============ */
+  'duct-heat-loss-calculator': hvacDuctCalculator,
   
   /* ============ Unit Converters ============ */
   

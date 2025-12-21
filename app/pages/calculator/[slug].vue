@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getCalculator, calculators } from '~/components/Calculator/calculators/index'
-import { isConverterConfig, isGeometryCalculatorConfig, isMetalWeightCalculatorConfig } from '~/components/Calculator/calculators/types'
-import type { GeometryCalculatorConfig, ConverterConfig, MetalWeightCalculatorConfig } from '~/components/Calculator/calculators/types'
+import { isConverterConfig, isGeometryCalculatorConfig, isMetalWeightCalculatorConfig, isHvacDuctCalculatorConfig } from '~/components/Calculator/calculators/types'
+import type { GeometryCalculatorConfig, ConverterConfig, MetalWeightCalculatorConfig, HvacDuctCalculatorConfig } from '~/components/Calculator/calculators/types'
 import { useUiTranslator } from '@/composables/useUiTranslator'
 
 const { t } = useUiTranslator()
@@ -24,6 +24,7 @@ if (!config.value) {
 const isConverter = computed(() => config.value && isConverterConfig(config.value))
 const isGeometry = computed(() => config.value && isGeometryCalculatorConfig(config.value))
 const isMetalWeight = computed(() => config.value && isMetalWeightCalculatorConfig(config.value))
+const isHvacDuct = computed(() => config.value && isHvacDuctCalculatorConfig(config.value))
 
 /* Get typed configs */
 const converterConfig = computed(() => 
@@ -36,6 +37,10 @@ const geometryConfig = computed(() =>
 
 const metalWeightConfig = computed(() => 
   isMetalWeight.value ? (config.value as MetalWeightCalculatorConfig) : null
+)
+
+const hvacDuctConfig = computed(() => 
+  isHvacDuct.value ? (config.value as HvacDuctCalculatorConfig) : null
 )
 
 /* Check if it's a volume calculator (3D) vs area calculator (2D) */
@@ -117,6 +122,12 @@ definePageMeta({
         <CalculatorMetalWeightWidget 
           v-else-if="isMetalWeight && metalWeightConfig" 
           :config="metalWeightConfig" 
+        />
+        
+        <!-- HVAC Duct Calculator -->
+        <CalculatorHvacDuctWidget 
+          v-else-if="isHvacDuct && hvacDuctConfig" 
+          :config="hvacDuctConfig" 
         />
         
         <!-- Placeholder for other calculators -->

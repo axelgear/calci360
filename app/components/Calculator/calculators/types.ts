@@ -89,9 +89,22 @@ export interface MetalWeightCalculatorConfig {
 }
 
 /**
+ * HVAC duct calculator configuration
+ */
+export interface HvacDuctCalculatorConfig {
+  type: 'hvac-duct'
+  name: string
+  description: string
+  category: string
+  icon: string
+  keywords: string[]
+  resultLabel: string
+}
+
+/**
  * Union type for all calculator configs
  */
-export type CalculatorConfig = ConverterConfig | GeometryCalculatorConfig | MetalWeightCalculatorConfig
+export type CalculatorConfig = ConverterConfig | GeometryCalculatorConfig | MetalWeightCalculatorConfig | HvacDuctCalculatorConfig
 
 /**
  * Type guard to check if config is a converter
@@ -112,6 +125,13 @@ export function isGeometryCalculatorConfig(config: CalculatorConfig): config is 
  */
 export function isMetalWeightCalculatorConfig(config: CalculatorConfig): config is MetalWeightCalculatorConfig {
   return config.type === 'metal-weight'
+}
+
+/**
+ * Type guard to check if config is an HVAC duct calculator
+ */
+export function isHvacDuctCalculatorConfig(config: CalculatorConfig): config is HvacDuctCalculatorConfig {
+  return config.type === 'hvac-duct'
 }
 
 /**

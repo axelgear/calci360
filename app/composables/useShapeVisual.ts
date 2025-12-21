@@ -48,7 +48,7 @@ export interface Shape3DRenderData {
   outline?: string
 }
 
-export type ShapeMode = 'area' | 'volume' | 'profile'
+export type ShapeMode = 'area' | 'volume' | 'profile' | 'hvac'
 
 /* ============ CONSTANTS ============ */
 
