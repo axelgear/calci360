@@ -1,7 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { time } from '../../base/time'
-import { SPEED_OF_LIGHT } from '../../base/constants'
-import { deriveFrequency } from '../../base/derived'
+import { time, deriveFrequency, SPEED_OF_LIGHT } from '../../units'
 
 /**
  * Frequency Converter - Derived from 1 / Time (f = 1 / T)

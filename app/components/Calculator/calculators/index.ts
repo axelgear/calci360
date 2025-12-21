@@ -24,10 +24,28 @@ import {
   frequencyConverter,
   /* Digital */
   dataConverter,
+  /* Electrical */
+  currentConverter,
+  voltageConverter,
+  resistanceConverter,
+  capacitanceConverter,
+  inductanceConverter,
+  /* Specialized */
+  illuminationConverter,
+  magneticFieldConverter,
+  radioactivityConverter,
+  radiationDoseConverter,
+  surfaceTensionConverter,
+  viscosityConverter,
+  thermalConductivityConverter,
+  heatCapacityConverter,
 } from './converters'
 
 /* Import geometry calculators */
 import { areaCalculator, volumeCalculator } from './geometry'
+
+/* Import engineering calculators */
+import { metalWeightCalculator } from './metal-weight'
 
 /**
  * Registry of all available calculators
@@ -37,6 +55,9 @@ export const calculators: Record<string, CalculatorConfig> = {
   /* ============ Geometry Calculators ============ */
   'area-calculator': areaCalculator,
   'volume-calculator': volumeCalculator,
+  
+  /* ============ Engineering Calculators ============ */
+  'metal-weight-calculator': metalWeightCalculator,
   
   /* ============ Unit Converters ============ */
   
@@ -66,6 +87,23 @@ export const calculators: Record<string, CalculatorConfig> = {
   
   /* Converters - Digital */
   'data-converter': dataConverter,
+  
+  /* Converters - Electrical */
+  'current-converter': currentConverter,
+  'voltage-converter': voltageConverter,
+  'resistance-converter': resistanceConverter,
+  'capacitance-converter': capacitanceConverter,
+  'inductance-converter': inductanceConverter,
+  
+  /* Converters - Specialized */
+  'illumination-converter': illuminationConverter,
+  'magnetic-field-converter': magneticFieldConverter,
+  'radioactivity-converter': radioactivityConverter,
+  'radiation-dose-converter': radiationDoseConverter,
+  'surface-tension-converter': surfaceTensionConverter,
+  'viscosity-converter': viscosityConverter,
+  'thermal-conductivity-converter': thermalConductivityConverter,
+  'heat-capacity-converter': heatCapacityConverter,
 }
 
 /**

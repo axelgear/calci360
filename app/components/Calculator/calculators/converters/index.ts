@@ -13,3 +13,9 @@ export { timeConverter, frequencyConverter } from './temporal'
 /* Digital converters */
 export { dataConverter } from './digital'
 
+/* Electrical converters */
+export { currentConverter, voltageConverter, resistanceConverter, capacitanceConverter, inductanceConverter } from './electrical'
+
+/* Specialized converters */
+export { illuminationConverter, magneticFieldConverter, radioactivityConverter, radiationDoseConverter, surfaceTensionConverter, viscosityConverter, thermalConductivityConverter, heatCapacityConverter } from './specialized'
+

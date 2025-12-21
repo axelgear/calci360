@@ -1,9 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { time } from '../../base/time'
-import { mass } from '../../base/mass'
-import { STANDARD_GRAVITY, ELEMENTARY_CHARGE } from '../../base/constants'
-import { deriveEnergyDirect } from '../../base/derived'
+import { length, time, mass, deriveEnergyDirect, STANDARD_GRAVITY, ELEMENTARY_CHARGE } from '../../units'
 
 /**
  * Energy Converter - Derived from Force × Distance (E = F × d)

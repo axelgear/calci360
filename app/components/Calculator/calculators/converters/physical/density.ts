@@ -1,7 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { mass } from '../../base/mass'
-import { deriveVolume, deriveDensity } from '../../base/derived'
+import { length, mass, deriveVolume, deriveDensity } from '../../units'
 
 /**
  * Density Converter - Derived from Mass / Volume (ρ = m / V)

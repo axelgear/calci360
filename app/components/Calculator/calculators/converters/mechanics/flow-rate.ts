@@ -1,7 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { time } from '../../base/time'
-import { deriveVolume, deriveVolumetricFlowRate } from '../../base/derived'
+import { length, time, deriveVolume, deriveVolumetricFlowRate } from '../../units'
 
 /**
  * Flow Rate Converter - Derived from Volume / Time (Q = V / t)

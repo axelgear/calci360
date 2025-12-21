@@ -1,5 +1,5 @@
 import type { ConverterConfig, UnitConfig } from '../../types'
-import { CELSIUS_OFFSET } from '../../base/constants'
+import { CELSIUS_OFFSET } from '../../units'
 
 /**
  * Temperature Converter - Special case with non-linear conversions

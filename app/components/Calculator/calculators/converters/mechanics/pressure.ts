@@ -1,9 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { time } from '../../base/time'
-import { mass } from '../../base/mass'
-import { STANDARD_GRAVITY, STANDARD_ATMOSPHERE } from '../../base/constants'
-import { derivePressure, deriveForce, deriveArea } from '../../base/derived'
+import { length, time, mass, derivePressure, deriveForce, deriveArea, STANDARD_GRAVITY, STANDARD_ATMOSPHERE } from '../../units'
 
 /**
  * Pressure Converter - Derived from Force / Area (P = F / A)

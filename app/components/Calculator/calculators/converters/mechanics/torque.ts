@@ -1,9 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { time } from '../../base/time'
-import { mass } from '../../base/mass'
-import { STANDARD_GRAVITY } from '../../base/constants'
-import { deriveTorque, deriveForce } from '../../base/derived'
+import { length, time, mass, deriveTorque, deriveForce, STANDARD_GRAVITY } from '../../units'
 
 /**
  * Torque Converter - Derived from Force × Distance (τ = F × r)

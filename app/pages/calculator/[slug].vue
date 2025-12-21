@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getCalculator, calculators } from '~/components/Calculator/calculators/index'
-import { isConverterConfig, isGeometryCalculatorConfig } from '~/components/Calculator/calculators/types'
-import type { GeometryCalculatorConfig } from '~/components/Calculator/calculators/types'
+import { isConverterConfig, isGeometryCalculatorConfig, isMetalWeightCalculatorConfig } from '~/components/Calculator/calculators/types'
+import type { GeometryCalculatorConfig, ConverterConfig, MetalWeightCalculatorConfig } from '~/components/Calculator/calculators/types'
 import { useUiTranslator } from '@/composables/useUiTranslator'
 
 const { t } = useUiTranslator()
@@ -23,10 +23,19 @@ if (!config.value) {
 /* Check calculator type */
 const isConverter = computed(() => config.value && isConverterConfig(config.value))
 const isGeometry = computed(() => config.value && isGeometryCalculatorConfig(config.value))
+const isMetalWeight = computed(() => config.value && isMetalWeightCalculatorConfig(config.value))
 
-/* Get geometry config with proper typing */
+/* Get typed configs */
+const converterConfig = computed(() => 
+  isConverter.value ? (config.value as ConverterConfig) : null
+)
+
 const geometryConfig = computed(() => 
   isGeometry.value ? (config.value as GeometryCalculatorConfig) : null
+)
+
+const metalWeightConfig = computed(() => 
+  isMetalWeight.value ? (config.value as MetalWeightCalculatorConfig) : null
 )
 
 /* Check if it's a volume calculator (3D) vs area calculator (2D) */
@@ -34,6 +43,9 @@ const isVolumeCalculator = computed(() =>
   geometryConfig.value?.resultLabel === 'Volume' || 
   geometryConfig.value?.resultUnit?.includes('³')
 )
+
+/* Geometry mode for unified widget */
+const geometryMode = computed(() => isVolumeCalculator.value ? 'volume' : 'area')
 
 /* SEO */
 useSeoMeta({
@@ -92,13 +104,20 @@ definePageMeta({
       <!-- Calculator Widget -->
       <main class="calculator-main">
         <!-- Unit Converter -->
-        <CalculatorConverterWidget v-if="isConverter" :config="config" />
+        <CalculatorConverterWidget v-if="isConverter && converterConfig" :config="converterConfig" />
         
-        <!-- Volume Calculator (3D) -->
-        <CalculatorVolumeWidget v-else-if="isGeometry && geometryConfig && isVolumeCalculator" :config="geometryConfig" />
+        <!-- Geometry Calculator (Area/Volume - unified) -->
+        <CalculatorGeometryWidget 
+          v-else-if="isGeometry && geometryConfig" 
+          :config="geometryConfig" 
+          :mode="geometryMode" 
+        />
         
-        <!-- Geometry Calculator (2D - Area) -->
-        <CalculatorGeometryWidget v-else-if="isGeometry && geometryConfig" :config="geometryConfig" />
+        <!-- Metal Weight Calculator -->
+        <CalculatorMetalWeightWidget 
+          v-else-if="isMetalWeight && metalWeightConfig" 
+          :config="metalWeightConfig" 
+        />
         
         <!-- Placeholder for other calculators -->
         <div v-else class="coming-soon">

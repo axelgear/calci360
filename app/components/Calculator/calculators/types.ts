@@ -59,52 +59,6 @@ export interface ConverterConfig extends BaseCalculatorConfig {
 }
 
 /**
- * Input field configuration for formula calculators
- */
-export interface CalculatorInputField {
-  id: string
-  label: string
-  type: 'number' | 'select' | 'slider'
-  placeholder?: string
-  min?: number
-  max?: number
-  step?: number
-  defaultValue?: number
-  unit?: string
-  /** Options for select type */
-  options?: { value: string | number; label: string }[]
-  /** Help text */
-  helpText?: string
-  /** Required field */
-  required?: boolean
-}
-
-/**
- * Output field configuration
- */
-export interface CalculatorOutputField {
-  id: string
-  label: string
-  unit?: string
-  precision?: number
-  /** Formula to calculate this output */
-  formula: string
-  /** Help text explaining the output */
-  helpText?: string
-}
-
-/**
- * Formula calculator configuration
- */
-export interface FormulaCalculatorConfig extends BaseCalculatorConfig {
-  type: 'formula'
-  inputs: CalculatorInputField[]
-  outputs: CalculatorOutputField[]
-  /** Optional formula explanation in markdown */
-  formulaExplanation?: string
-}
-
-/**
  * Geometry calculator configuration (imported from geometry folder)
  */
 export interface GeometryCalculatorConfig {
@@ -122,9 +76,22 @@ export interface GeometryCalculatorConfig {
 }
 
 /**
+ * Metal weight calculator configuration
+ */
+export interface MetalWeightCalculatorConfig {
+  type: 'metal-weight'
+  name: string
+  description: string
+  category: string
+  icon: string
+  keywords: string[]
+  resultLabel: string
+}
+
+/**
  * Union type for all calculator configs
  */
-export type CalculatorConfig = ConverterConfig | FormulaCalculatorConfig | GeometryCalculatorConfig
+export type CalculatorConfig = ConverterConfig | GeometryCalculatorConfig | MetalWeightCalculatorConfig
 
 /**
  * Type guard to check if config is a converter
@@ -134,17 +101,17 @@ export function isConverterConfig(config: CalculatorConfig): config is Converter
 }
 
 /**
- * Type guard to check if config is a formula calculator
- */
-export function isFormulaCalculatorConfig(config: CalculatorConfig): config is FormulaCalculatorConfig {
-  return config.type === 'formula'
-}
-
-/**
  * Type guard to check if config is a geometry calculator
  */
 export function isGeometryCalculatorConfig(config: CalculatorConfig): config is GeometryCalculatorConfig {
   return config.type === 'geometry'
+}
+
+/**
+ * Type guard to check if config is a metal weight calculator
+ */
+export function isMetalWeightCalculatorConfig(config: CalculatorConfig): config is MetalWeightCalculatorConfig {
+  return config.type === 'metal-weight'
 }
 
 /**

@@ -1,9 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { time } from '../../base/time'
-import { mass } from '../../base/mass'
-import { STANDARD_GRAVITY } from '../../base/constants'
-import { deriveForce } from '../../base/derived'
+import { length, time, mass, deriveForce, STANDARD_GRAVITY } from '../../units'
 
 /**
  * Force Converter - Derived from Mass × Acceleration (F = m × a)

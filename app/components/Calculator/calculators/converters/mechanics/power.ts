@@ -1,9 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { time } from '../../base/time'
-import { mass } from '../../base/mass'
-import { STANDARD_GRAVITY } from '../../base/constants'
-import { derivePower, deriveEnergyDirect } from '../../base/derived'
+import { length, time, mass, derivePower, deriveEnergyDirect, STANDARD_GRAVITY } from '../../units'
 
 /**
  * Power Converter - Derived from Energy / Time (P = E / t)

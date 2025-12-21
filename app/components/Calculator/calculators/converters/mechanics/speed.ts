@@ -1,8 +1,5 @@
 import type { ConverterConfig } from '../../types'
-import { length } from '../../base/length'
-import { time } from '../../base/time'
-import { SPEED_OF_LIGHT, SPEED_OF_SOUND } from '../../base/constants'
-import { deriveSpeed } from '../../base/derived'
+import { length, time, deriveSpeed, SPEED_OF_LIGHT, SPEED_OF_SOUND } from '../../units'
 
 /**
  * Speed/Velocity Converter - Derived from Length / Time
