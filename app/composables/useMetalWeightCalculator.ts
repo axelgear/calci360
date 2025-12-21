@@ -137,7 +137,8 @@ export function useMetalWeightCalculator(config: Ref<MetalWeightCalculatorConfig
       selectedProfile.value.inputs.forEach(input => {
         inputValues[input.id] = input.default ?? 1
         if (!inputUnits[input.id]) {
-          inputUnits[input.id] = 'meter'
+          /* Use meter for 'length', millimeter for all other dimensions */
+          inputUnits[input.id] = input.id === 'length' ? 'meter' : 'millimeter'
         }
       })
     }

@@ -5,6 +5,8 @@ import UnitInput from './UnitInput.vue'
 import FormulaCard from './FormulaCard.vue'
 import ResultCard from './ResultCard.vue'
 import ConversionsCard from './ConversionsCard.vue'
+import StressStrainCurve from './StressStrainCurve.vue'
+import MaterialProperties from './MaterialProperties.vue'
 import Dropdown from '~/components/Dropdown.vue'
 import ShapeVisual from '~/components/Calculator/shapes/ShapeVisual.vue'
 import { useMetalWeightCalculator } from '@/composables/useMetalWeightCalculator'
@@ -325,6 +327,25 @@ function formatWeight(kg: number): string {
       :copied-id="copiedId"
       @copy="copyConversion"
     />
+    
+    <!-- Material Properties Section -->
+    <div v-if="selectedMaterial" class="material-section">
+      <div class="material-section-grid">
+        <!-- Stress-Strain Curve -->
+        <StressStrainCurve
+          v-if="selectedMaterial.mechanical"
+          :material="selectedMaterial.name"
+          :mechanical="selectedMaterial.mechanical"
+        />
+        
+        <!-- Material Properties -->
+        <MaterialProperties
+          :material="selectedMaterial.name"
+          :density="selectedMaterial.density"
+          :mechanical="selectedMaterial.mechanical"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -598,6 +619,21 @@ function formatWeight(kg: number): string {
 .purchase-detail {
   font-size: 0.8rem;
   color: var(--neutral);
+}
+
+/* Material Properties Section */
+.material-section {
+  margin-top: 1rem;
+}
+
+.material-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  
+  @include tablet {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 

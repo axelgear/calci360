@@ -841,68 +841,86 @@ const shape3DData = computed<Shape3DRenderData>(() => {
 })
 
 /* ============================================================
-   METAL PROFILE SHAPES - Uses SIZE_2D for consistency
+   METAL PROFILE SHAPES - Dynamic scaling based on actual dimensions
    ============================================================ */
 const profileData = computed(() => {
   if (props.mode !== 'profile') return { type: 'unknown', attrs: {}, labels: [] }
 
   const cx = SIZE_2D / 2
   const cy = SIZE_2D / 2
+  const maxSize = INNER_2D * 0.85 /* Maximum shape size */
 
   let pathData: { type: string; attrs: Record<string, unknown> }
   let labels: ShapeLabel[] = []
 
   switch (props.shapeId) {
     case 'round-bar': {
-      const r = INNER_2D * 0.4
+      const diameter = get('diameter', 0.02)
+      const r = maxSize * 0.45 /* Visual radius */
       pathData = { type: 'circle', attrs: { cx, cy, r } }
-      labels = [{ x: cx, y: cy + INNER_2D * 0.5, text: `⌀ ${fmt(get('diameter'), true)} ${getUnitSymbol('diameter')}` }]
+      labels = [{ x: cx, y: cy + r + 16, text: `⌀ ${fmt(diameter, true)} ${getUnitSymbol('diameter')}` }]
       break
     }
 
     case 'square-bar': {
-      const s = INNER_2D * 0.7
+      const side = get('side', 0.02)
+      const s = maxSize * 0.7
       pathData = { type: 'rect', attrs: { x: cx - s / 2, y: cy - s / 2, width: s, height: s } }
-      labels = [{ x: cx, y: cy + INNER_2D * 0.45, text: `${fmt(get('side'), true)} ${getUnitSymbol('side')}` }]
+      labels = [
+        { x: cx, y: cy + s / 2 + 16, text: `a = ${fmt(side, true)} ${getUnitSymbol('side')}` },
+      ]
       break
     }
 
     case 'rectangular-bar': {
-      const w = INNER_2D * 0.8
-      const h = INNER_2D * 0.5
+      const width = get('width', 0.03)
+      const height = get('height', 0.02)
+      const ratio = width / height
+      let w = maxSize * 0.8
+      let h = w / ratio
+      if (h > maxSize * 0.7) { h = maxSize * 0.7; w = h * ratio }
       pathData = { type: 'rect', attrs: { x: cx - w / 2, y: cy - h / 2, width: w, height: h } }
       labels = [
-        { x: cx, y: cy + INNER_2D * 0.35, text: `w: ${fmt(get('width'), true)} ${getUnitSymbol('width')}` },
-        { x: cx - INNER_2D * 0.5, y: cy, text: `h: ${fmt(get('height'), true)} ${getUnitSymbol('height')}`, rotate: -90 },
+        { x: cx, y: cy + h / 2 + 16, text: `w = ${fmt(width, true)} ${getUnitSymbol('width')}` },
+        { x: cx - w / 2 - 10, y: cy, text: `h = ${fmt(height, true)}`, rotate: -90 },
       ]
       break
     }
 
     case 'hexagonal-bar': {
-      const r = INNER_2D * 0.4
+      const flatToFlat = get('flatToFlat', 0.02)
+      const r = maxSize * 0.4 /* Circumradius for drawing */
       const points = Array.from({ length: 6 }, (_, i) => {
         const angle = (Math.PI / 3) * i - Math.PI / 6
         return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`
       }).join(' ')
       pathData = { type: 'polygon', attrs: { points } }
-      labels = [{ x: cx, y: cy + INNER_2D * 0.5, text: `f: ${fmt(get('flatToFlat'), true)} ${getUnitSymbol('flatToFlat')}` }]
+      labels = [{ x: cx, y: cy + r + 16, text: `f = ${fmt(flatToFlat, true)} ${getUnitSymbol('flatToFlat')}` }]
       break
     }
 
     case 'sheet': {
-      const w = INNER_2D * 0.9
-      const h = INNER_2D * 0.15
+      const length = get('length', 1)
+      const width = get('width', 0.5)
+      const thickness = get('thickness', 0.002)
+      /* Sheet shown as thin rectangle - emphasize the length/width ratio */
+      const ratio = Math.min(Math.max(width / length, 0.3), 1)
+      const w = maxSize * 0.9
+      const h = Math.max(maxSize * 0.08, maxSize * 0.2 * ratio) /* Thin but visible */
       pathData = { type: 'rect', attrs: { x: cx - w / 2, y: cy - h / 2, width: w, height: h } }
       labels = [
-        { x: cx, y: cy - INNER_2D * 0.2, text: `t: ${fmt(get('thickness'), true)} ${getUnitSymbol('thickness')}` },
-        { x: cx, y: cy + INNER_2D * 0.2, text: `${fmt(get('length'), true)} × ${fmt(get('width'), true)} ${getUnitSymbol('length')}` },
+        { x: cx, y: cy - h / 2 - 12, text: `t = ${fmt(thickness, true)} ${getUnitSymbol('thickness')}` },
+        { x: cx, y: cy + h / 2 + 16, text: `${fmt(length, true)} × ${fmt(width, true)} ${getUnitSymbol('length')}` },
       ]
       break
     }
 
     case 'round-tube': {
-      const outerR = INNER_2D * 0.4
-      const innerR = outerR * 0.75
+      const od = get('outerDiameter', 0.05)
+      const wall = get('wallThickness', 0.003)
+      const wallRatio = Math.min(wall / (od / 2), 0.4) /* Wall as fraction of radius */
+      const outerR = maxSize * 0.42
+      const innerR = outerR * (1 - wallRatio * 2)
       pathData = {
         type: 'path',
         attrs: {
@@ -911,16 +929,19 @@ const profileData = computed(() => {
         },
       }
       labels = [
-        { x: cx, y: cy + INNER_2D * 0.55, text: `OD: ${fmt(get('outerDiameter'), true)} ${getUnitSymbol('outerDiameter')}` },
-        { x: cx, y: cy - 5, text: `t: ${fmt(get('wallThickness'), true)}` },
+        { x: cx, y: cy + outerR + 16, text: `OD = ${fmt(od, true)} ${getUnitSymbol('outerDiameter')}` },
+        { x: cx + outerR * 0.5, y: cy - outerR * 0.7, text: `t = ${fmt(wall, true)}` },
       ]
       break
     }
 
     case 'square-tube': {
-      const outer = INNER_2D * 0.7
-      const wall = outer * 0.15
-      const inner = outer - wall * 2
+      const outerSide = get('outerSide', 0.05)
+      const wall = get('wallThickness', 0.003)
+      const wallRatio = Math.min(wall / outerSide, 0.2)
+      const outer = maxSize * 0.7
+      const wallVisual = outer * wallRatio * 2
+      const inner = outer - wallVisual * 2
       const ox = cx - outer / 2
       const oy = cy - outer / 2
       const ix = cx - inner / 2
@@ -932,64 +953,102 @@ const profileData = computed(() => {
           'fill-rule': 'evenodd',
         },
       }
-      labels = [{ x: cx, y: cy + INNER_2D * 0.45, text: `t: ${fmt(get('wallThickness'), true)} ${getUnitSymbol('wallThickness')}` }]
+      labels = [
+        { x: cx, y: cy + outer / 2 + 16, text: `a = ${fmt(outerSide, true)} ${getUnitSymbol('outerSide')}` },
+        { x: cx + outer / 2 + 8, y: cy, text: `t = ${fmt(wall, true)}` },
+      ]
       break
     }
 
     case 'rectangular-tube': {
-      const outerW = INNER_2D * 0.8
-      const outerH = INNER_2D * 0.5
-      const wall = Math.min(outerW, outerH) * 0.12
-      const innerW = outerW - wall * 2
-      const innerH = outerH - wall * 2
-      const ox = cx - outerW / 2
-      const oy = cy - outerH / 2
+      const outerW = get('outerWidth', 0.06)
+      const outerH = get('outerHeight', 0.04)
+      const wall = get('wallThickness', 0.003)
+      const ratio = outerW / outerH
+      let w = maxSize * 0.8
+      let h = w / ratio
+      if (h > maxSize * 0.6) { h = maxSize * 0.6; w = h * ratio }
+      const wallRatio = Math.min(wall / Math.min(outerW, outerH), 0.15)
+      const wallVisual = Math.min(w, h) * wallRatio * 2
+      const innerW = w - wallVisual * 2
+      const innerH = h - wallVisual * 2
+      const ox = cx - w / 2
+      const oy = cy - h / 2
       const ix = cx - innerW / 2
       const iy = cy - innerH / 2
       pathData = {
         type: 'path',
         attrs: {
-          d: `M ${ox} ${oy} h ${outerW} v ${outerH} h ${-outerW} Z M ${ix} ${iy} v ${innerH} h ${innerW} v ${-innerH} Z`,
+          d: `M ${ox} ${oy} h ${w} v ${h} h ${-w} Z M ${ix} ${iy} v ${innerH} h ${innerW} v ${-innerH} Z`,
           'fill-rule': 'evenodd',
         },
       }
-      labels = [{ x: cx, y: cy + INNER_2D * 0.45, text: `t: ${fmt(get('wallThickness'), true)} ${getUnitSymbol('wallThickness')}` }]
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `${fmt(outerW, true)} × ${fmt(outerH, true)}` },
+        { x: cx + w / 2 + 8, y: cy, text: `t = ${fmt(wall, true)}` },
+      ]
       break
     }
 
     case 'angle-bar': {
-      const size = INNER_2D * 0.7
-      const thick = size * 0.15
+      const legA = get('legA', 0.05)
+      const legB = get('legB', 0.05)
+      const thick = get('thickness', 0.005)
+      const ratio = legA / legB
+      const thickRatio = Math.min(thick / Math.min(legA, legB), 0.25)
+      let a = maxSize * 0.7
+      let b = a / ratio
+      if (b > maxSize * 0.7) { b = maxSize * 0.7; a = b * ratio }
+      const t = Math.min(a, b) * thickRatio
+      const x0 = cx - a / 2
+      const y0 = cy - b / 2
       pathData = {
         type: 'path',
-        attrs: { d: `M ${cx - size / 2} ${cy - size / 2} h ${thick} v ${size - thick} h ${size - thick} v ${thick} h ${-size} Z` },
+        attrs: { d: `M ${x0} ${y0} h ${t} v ${b - t} h ${a - t} v ${t} h ${-a} Z` },
       }
       labels = [
-        { x: cx - INNER_2D * 0.1, y: cy + INNER_2D * 0.45, text: `${fmt(get('legA'), true)} × ${fmt(get('legB'), true)}` },
-        { x: cx + INNER_2D * 0.3, y: cy - INNER_2D * 0.1, text: `t: ${fmt(get('thickness'), true)}` },
+        { x: cx, y: cy + b / 2 + 16, text: `${fmt(legA, true)} × ${fmt(legB, true)}` },
+        { x: x0 + t + 10, y: y0 + 10, text: `t = ${fmt(thick, true)}` },
       ]
       break
     }
 
     case 'channel': {
-      const h = INNER_2D * 0.7
-      const w = INNER_2D * 0.4
-      const thick = h * 0.12
+      const height = get('height', 0.1)
+      const width = get('width', 0.05)
+      const thick = get('thickness', 0.006)
+      const hRatio = height / width
+      const thickRatio = Math.min(thick / width, 0.2)
+      let w = maxSize * 0.5
+      let h = w * hRatio
+      if (h > maxSize * 0.75) { h = maxSize * 0.75; w = h / hRatio }
+      const t = w * thickRatio
       const x = cx - w / 2
       const y = cy - h / 2
       pathData = {
         type: 'path',
-        attrs: { d: `M ${x} ${y} h ${w} v ${thick} h ${-(w - thick)} v ${h - thick * 2} h ${w - thick} v ${thick} h ${-w} Z` },
+        attrs: { d: `M ${x} ${y} h ${w} v ${t} h ${-(w - t)} v ${h - t * 2} h ${w - t} v ${t} h ${-w} Z` },
       }
-      labels = [{ x: cx, y: cy + INNER_2D * 0.45, text: `${fmt(get('height'), true)} × ${fmt(get('width'), true)}` }]
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `H = ${fmt(height, true)}` },
+        { x: cx + w / 2 + 10, y: cy, text: `w = ${fmt(width, true)}` },
+      ]
       break
     }
 
     case 'i-beam': {
-      const h = INNER_2D * 0.75
-      const w = INNER_2D * 0.6
-      const tf = h * 0.15
-      const tw = w * 0.15
+      const height = get('height', 0.1)
+      const flangeW = get('flangeWidth', 0.05)
+      const webT = get('webThickness', 0.005)
+      const flangeT = get('flangeThickness', 0.008)
+      const hRatio = height / flangeW
+      let w = maxSize * 0.65
+      let h = w * hRatio
+      if (h > maxSize * 0.8) { h = maxSize * 0.8; w = h / hRatio }
+      const tfRatio = Math.min(flangeT / height, 0.15)
+      const twRatio = Math.min(webT / flangeW, 0.2)
+      const tf = h * tfRatio
+      const tw = w * twRatio
       const x = cx - w / 2
       const y = cy - h / 2
       pathData = {
@@ -997,24 +1056,333 @@ const profileData = computed(() => {
         attrs: { d: `M ${x} ${y} h ${w} v ${tf} h ${-(w - tw) / 2} v ${h - tf * 2} h ${(w - tw) / 2} v ${tf} h ${-w} v ${-tf} h ${(w - tw) / 2} v ${-(h - tf * 2)} h ${-(w - tw) / 2} Z` },
       }
       labels = [
-        { x: cx, y: cy + INNER_2D * 0.5, text: `H: ${fmt(get('height'), true)}` },
-        { x: cx + INNER_2D * 0.35, y: cy - INNER_2D * 0.3, text: `b: ${fmt(get('flangeWidth'), true)}` },
+        { x: cx, y: cy + h / 2 + 16, text: `H = ${fmt(height, true)}` },
+        { x: cx + w / 2 + 10, y: cy - h / 2 + tf / 2, text: `b = ${fmt(flangeW, true)}` },
       ]
       break
     }
 
     case 't-bar': {
-      const w = INNER_2D * 0.6
-      const h = INNER_2D * 0.6
-      const tf = h * 0.18
-      const tw = w * 0.2
+      const flangeW = get('flangeWidth', 0.05)
+      const totalH = get('totalHeight', 0.05)
+      const flangeT = get('flangeThickness', 0.005)
+      const webT = get('webThickness', 0.005)
+      const hRatio = totalH / flangeW
+      let w = maxSize * 0.65
+      let h = w * hRatio
+      if (h > maxSize * 0.7) { h = maxSize * 0.7; w = h / hRatio }
+      const tfRatio = Math.min(flangeT / totalH, 0.25)
+      const twRatio = Math.min(webT / flangeW, 0.25)
+      const tf = h * tfRatio
+      const tw = w * twRatio
       const x = cx - w / 2
       const y = cy - h / 2
       pathData = {
         type: 'path',
         attrs: { d: `M ${x} ${y} h ${w} v ${tf} h ${-(w - tw) / 2} v ${h - tf} h ${-tw} v ${-(h - tf)} h ${-(w - tw) / 2} Z` },
       }
-      labels = [{ x: cx, y: cy + INNER_2D * 0.45, text: `${fmt(get('flangeWidth'), true)} × ${fmt(get('totalHeight'), true)}` }]
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `${fmt(flangeW, true)} × ${fmt(totalH, true)}` },
+      ]
+      break
+    }
+
+    case 'h-beam': {
+      /* H-Beam (Wide Flange) - similar to I-beam but flanges ≈ height */
+      const height = get('height', 0.2)
+      const flangeW = get('flangeWidth', 0.2)
+      const webT = get('webThickness', 0.009)
+      const flangeT = get('flangeThickness', 0.014)
+      const hRatio = height / flangeW
+      let w = maxSize * 0.7
+      let h = w * hRatio
+      if (h > maxSize * 0.75) { h = maxSize * 0.75; w = h / hRatio }
+      const tfRatio = Math.min(flangeT / height, 0.12)
+      const twRatio = Math.min(webT / flangeW, 0.15)
+      const tf = h * tfRatio
+      const tw = w * twRatio
+      const x = cx - w / 2
+      const y = cy - h / 2
+      pathData = {
+        type: 'path',
+        attrs: { d: `M ${x} ${y} h ${w} v ${tf} h ${-(w - tw) / 2} v ${h - tf * 2} h ${(w - tw) / 2} v ${tf} h ${-w} v ${-tf} h ${(w - tw) / 2} v ${-(h - tf * 2)} h ${-(w - tw) / 2} Z` },
+      }
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `H = ${fmt(height, true)}` },
+        { x: cx + w / 2 + 10, y: cy, text: `b = ${fmt(flangeW, true)}` },
+      ]
+      break
+    }
+
+    case 'flat-bar': {
+      /* Flat Bar - thin rectangle */
+      const width = get('width', 0.05)
+      const thickness = get('thickness', 0.005)
+      const ratio = width / thickness
+      let w = maxSize * 0.85
+      let h = Math.max(w / ratio, maxSize * 0.1) /* Ensure visible thickness */
+      if (h > maxSize * 0.3) { h = maxSize * 0.3; w = h * ratio }
+      pathData = { type: 'rect', attrs: { x: cx - w / 2, y: cy - h / 2, width: w, height: h } }
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `w = ${fmt(width, true)} ${getUnitSymbol('width')}` },
+        { x: cx, y: cy - h / 2 - 8, text: `t = ${fmt(thickness, true)}` },
+      ]
+      break
+    }
+
+    case 't-slot': {
+      /* T-Slot Extrusion - square profile with slots on each side */
+      const size = get('size', 0.04)
+      const wallT = get('wallThickness', 0.002)
+      const slotW = get('slotWidth', 0.008)
+      const s = maxSize * 0.75
+      const wallRatio = Math.min(wallT / size, 0.1)
+      const slotRatio = Math.min(slotW / size, 0.25)
+      const wall = s * wallRatio
+      const slot = s * slotRatio
+      const x = cx - s / 2
+      const y = cy - s / 2
+      /* Outer square with 4 T-slots */
+      const slotDepth = s * 0.25
+      const inner = s - wall * 2
+      pathData = {
+        type: 'path',
+        attrs: {
+          d: `
+            M ${x} ${y} h ${s} v ${s} h ${-s} Z
+            M ${x + wall} ${y + wall} v ${inner} h ${inner} v ${-inner} Z
+            M ${cx - slot / 2} ${y} v ${slotDepth} h ${slot} v ${-slotDepth} Z
+            M ${cx - slot / 2} ${y + s} v ${-slotDepth} h ${slot} v ${slotDepth} Z
+            M ${x} ${cy - slot / 2} h ${slotDepth} v ${slot} h ${-slotDepth} Z
+            M ${x + s} ${cy - slot / 2} h ${-slotDepth} v ${slot} h ${slotDepth} Z
+          `,
+          'fill-rule': 'evenodd',
+        },
+      }
+      labels = [
+        { x: cx, y: cy + s / 2 + 16, text: `S = ${fmt(size, true)} ${getUnitSymbol('size')}` },
+      ]
+      break
+    }
+
+    case 'bulb-flat': {
+      /* Bulb Flat - flat bar with semicircular bulb on one edge */
+      const height = get('height', 0.12)
+      const webT = get('webThickness', 0.007)
+      const bulbD = get('bulbDiameter', 0.02)
+      const hRatio = height / bulbD
+      let h = maxSize * 0.7
+      let bulbR = h / hRatio / 2
+      if (bulbR > maxSize * 0.12) { bulbR = maxSize * 0.12; h = bulbR * 2 * hRatio }
+      const webRatio = Math.min(webT / bulbD, 0.5)
+      const web = bulbR * 2 * webRatio
+      const x = cx - web / 2
+      const y = cy - h / 2
+      pathData = {
+        type: 'path',
+        attrs: {
+          d: `M ${x} ${y} h ${web} v ${h - bulbR} a ${bulbR} ${bulbR} 0 1 1 ${-web} 0 Z`,
+        },
+      }
+      labels = [
+        { x: cx - web / 2 - 12, y: cy, text: `h = ${fmt(height, true)}`, rotate: -90 },
+        { x: cx, y: cy + h / 2 + 16, text: `db = ${fmt(bulbD, true)}` },
+      ]
+      break
+    }
+
+    case 'rebar': {
+      /* Rebar - round bar with visual indication of ribs */
+      const nomD = get('nominalDiameter', 0.012)
+      const r = maxSize * 0.35
+      const ribCount = 8
+      pathData = { type: 'circle', attrs: { cx, cy, r } }
+      /* Add visual ribs */
+      const ribLines: string[] = []
+      for (let i = 0; i < ribCount; i++) {
+        const angle = (Math.PI * 2 * i) / ribCount
+        const x1 = cx + r * 0.85 * Math.cos(angle)
+        const y1 = cy + r * 0.85 * Math.sin(angle)
+        const x2 = cx + r * 1.08 * Math.cos(angle)
+        const y2 = cy + r * 1.08 * Math.sin(angle)
+        ribLines.push(`M ${x1} ${y1} L ${x2} ${y2}`)
+      }
+      pathData = {
+        type: 'path',
+        attrs: {
+          d: `M ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy} ${ribLines.join(' ')}`,
+        },
+      }
+      labels = [{ x: cx, y: cy + r + 20, text: `⌀n = ${fmt(nomD, true)} ${getUnitSymbol('nominalDiameter')}` }]
+      break
+    }
+
+    case 'struct-channel': {
+      /* Structural Channel - C-channel with distinct flange/web thicknesses */
+      const height = get('height', 0.15)
+      const flangeW = get('flangeWidth', 0.075)
+      const webT = get('webThickness', 0.009)
+      const flangeT = get('flangeThickness', 0.013)
+      const hRatio = height / flangeW
+      let b = maxSize * 0.45
+      let h = b * hRatio
+      if (h > maxSize * 0.75) { h = maxSize * 0.75; b = h / hRatio }
+      const tfRatio = Math.min(flangeT / height, 0.12)
+      const twRatio = Math.min(webT / flangeW, 0.2)
+      const tf = h * tfRatio
+      const tw = b * twRatio
+      const x = cx - b / 2
+      const y = cy - h / 2
+      pathData = {
+        type: 'path',
+        attrs: { d: `M ${x} ${y} h ${b} v ${tf} h ${-(b - tw)} v ${h - tf * 2} h ${b - tw} v ${tf} h ${-b} Z` },
+      }
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `H = ${fmt(height, true)}` },
+        { x: cx + b / 2 + 10, y: cy - h / 2 + tf / 2, text: `b = ${fmt(flangeW, true)}` },
+      ]
+      break
+    }
+
+    case 'lip-channel': {
+      /* Lip Channel - C-channel with inward lips */
+      const height = get('height', 0.15)
+      const flangeW = get('flangeWidth', 0.065)
+      const thick = get('thickness', 0.002)
+      const lipH = get('lipHeight', 0.02)
+      const hRatio = height / flangeW
+      let b = maxSize * 0.45
+      let h = b * hRatio
+      if (h > maxSize * 0.7) { h = maxSize * 0.7; b = h / hRatio }
+      const t = Math.max(b * 0.06, 2)
+      const lip = h * (lipH / height)
+      const x = cx - b / 2
+      const y = cy - h / 2
+      /* C-shape with inward lips at top and bottom */
+      pathData = {
+        type: 'path',
+        attrs: {
+          d: `M ${x} ${y} h ${b} v ${lip} h ${-t} v ${-lip + t} h ${-(b - t * 2)} v ${h - t * 2} h ${b - t * 2} v ${-lip + t} h ${t} v ${lip} h ${-b} Z`,
+        },
+      }
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `H = ${fmt(height, true)}` },
+        { x: cx + b / 2 + 10, y: cy, text: `c = ${fmt(lipH, true)}` },
+      ]
+      break
+    }
+
+    case 'top-hat': {
+      /* Top Hat Section - hat-shaped profile */
+      const height = get('height', 0.05)
+      const topW = get('topWidth', 0.04)
+      const bottomW = get('bottomWidth', 0.025)
+      const thick = get('thickness', 0.0015)
+      /* Total width = topW + 2*bottomW */
+      const totalW = topW + 2 * bottomW
+      const hRatio = height / totalW
+      let w = maxSize * 0.75
+      let h = Math.min(w * hRatio, maxSize * 0.4)
+      const topRatio = topW / totalW
+      const bottomRatio = bottomW / totalW
+      const tw = w * topRatio
+      const bw = w * bottomRatio
+      const t = Math.max(w * 0.04, 2)
+      const x = cx - w / 2
+      const y = cy - h / 2
+      /* Hat shape: bottom flanges, sides going up, top */
+      pathData = {
+        type: 'path',
+        attrs: {
+          d: `
+            M ${x} ${y + h} h ${bw} v ${-h} h ${tw} v ${h} h ${bw} v ${-t}
+            h ${-(bw - t)} v ${-(h - t)} h ${-(tw + t * 2)} v ${h - t} h ${-(bw - t)} Z
+          `,
+        },
+      }
+      labels = [
+        { x: cx, y: cy + h / 2 + 16, text: `wt = ${fmt(topW, true)}` },
+        { x: cx - w / 2 - 10, y: cy, text: `h = ${fmt(height, true)}`, rotate: -90 },
+      ]
+      break
+    }
+
+    case 'sigma-section': {
+      /* Sigma Section - Σ-shaped cold-formed section */
+      const height = get('height', 0.2)
+      const flangeW = get('flangeWidth', 0.07)
+      const thick = get('thickness', 0.002)
+      const foldD = get('foldDepth', 0.02)
+      const lipH = get('lipHeight', 0.02)
+      const hRatio = height / flangeW
+      let b = maxSize * 0.4
+      let h = b * hRatio
+      if (h > maxSize * 0.7) { h = maxSize * 0.7; b = h / hRatio }
+      const t = Math.max(b * 0.06, 2)
+      const fold = b * (foldD / flangeW) * 1.5
+      const lip = lipH > 0 ? h * (lipH / height) : 0
+      const x = cx - b / 2
+      const y = cy - h / 2
+      /* Sigma shape: flanges with inward folds creating Σ profile */
+      pathData = {
+        type: 'path',
+        attrs: {
+          d: lip > 0
+            ? `
+              M ${x + b} ${y - lip} v ${lip + t} h ${-b} l ${fold} ${(h - t * 2) / 2} l ${-fold} ${(h - t * 2) / 2} h ${b} v ${t + lip}
+              h ${-t} v ${-lip} h ${-(b - t * 2)} l ${fold} ${-(h - t * 2) / 2} l ${-fold} ${-(h - t * 2) / 2} h ${b - t * 2} v ${-lip} Z
+            `
+            : `
+              M ${x + b} ${y} v ${t} h ${-b} l ${fold} ${(h - t * 2) / 2} l ${-fold} ${(h - t * 2) / 2} h ${b} v ${t}
+              h ${-t} h ${-(b - t * 2)} l ${fold} ${-(h - t * 2) / 2} l ${-fold} ${-(h - t * 2) / 2} h ${b - t * 2} h ${-t} Z
+            `,
+        },
+      }
+      labels = [
+        { x: cx, y: cy + h / 2 + (lip > 0 ? lip : 0) + 16, text: `H = ${fmt(height, true)}` },
+      ]
+      break
+    }
+
+    case 'uneven-sigma': {
+      /* Uneven Sigma - asymmetric sigma section */
+      const height = get('height', 0.25)
+      const topB = get('topFlangeWidth', 0.08)
+      const botB = get('bottomFlangeWidth', 0.06)
+      const thick = get('thickness', 0.002)
+      const foldD = get('foldDepth', 0.02)
+      const lipH = get('lipHeight', 0.02)
+      const maxFlange = Math.max(topB, botB)
+      const hRatio = height / maxFlange
+      let bMax = maxSize * 0.4
+      let h = bMax * hRatio
+      if (h > maxSize * 0.7) { h = maxSize * 0.7; bMax = h / hRatio }
+      const bTop = bMax * (topB / maxFlange)
+      const bBot = bMax * (botB / maxFlange)
+      const t = Math.max(bMax * 0.06, 2)
+      const fold = bMax * (foldD / maxFlange) * 1.5
+      const lip = lipH > 0 ? h * (lipH / height) : 0
+      const x = cx - bMax / 2
+      const y = cy - h / 2
+      /* Asymmetric sigma with different top/bottom flange widths */
+      pathData = {
+        type: 'path',
+        attrs: {
+          d: lip > 0
+            ? `
+              M ${x + bTop} ${y - lip} v ${lip + t} h ${-bTop} l ${fold} ${(h - t * 2) / 2} l ${-fold} ${(h - t * 2) / 2} h ${bBot} v ${t + lip}
+              h ${-t} v ${-lip} h ${-(bBot - t * 2)} l ${fold} ${-(h - t * 2) / 2} l ${-fold} ${-(h - t * 2) / 2} h ${bTop - t * 2} v ${-lip} Z
+            `
+            : `
+              M ${x + bTop} ${y} v ${t} h ${-bTop} l ${fold} ${(h - t * 2) / 2} l ${-fold} ${(h - t * 2) / 2} h ${bBot} v ${t}
+              h ${-t} h ${-(bBot - t * 2)} l ${fold} ${-(h - t * 2) / 2} l ${-fold} ${-(h - t * 2) / 2} h ${bTop - t * 2} h ${-t} Z
+            `,
+        },
+      }
+      labels = [
+        { x: cx, y: cy + h / 2 + (lip > 0 ? lip : 0) + 16, text: `H = ${fmt(height, true)}` },
+        { x: cx, y: cy - h / 2 - (lip > 0 ? lip : 0) - 8, text: `bt = ${fmt(topB, true)}, bb = ${fmt(botB, true)}` },
+      ]
       break
     }
 

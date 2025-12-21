@@ -3,9 +3,9 @@
  */
 
 import type { ProfileDefinition } from './profiles'
-import type { Material, MaterialGroup } from './materials'
+import type { Material, MaterialGroup, MechanicalProperties } from './materials'
 
-export type { ProfileDefinition, Material, MaterialGroup }
+export type { ProfileDefinition, Material, MaterialGroup, MechanicalProperties }
 
 export interface MetalWeightCalculatorConfig {
   type: 'metal-weight'
