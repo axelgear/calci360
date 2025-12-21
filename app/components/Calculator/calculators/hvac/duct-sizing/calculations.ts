@@ -1,22 +1,20 @@
 /**
  * HVAC Duct Sizing Calculations
  * Based on ASHRAE Fundamentals and SMACNA standards
+ * Uses Standard Duct Sizing Table (Equal-Friction Method 0.10 in.wg per 100 ft)
  */
 
 import type { DuctDimensions, DuctSegment, DuctSystem, DuctNode, SystemResults, BOMItem } from './types'
 import { calculateAirDensity, calculateAirViscosity, calculateSpecificHeat } from './air-properties'
 import { getFitting, calculateEquivalentLength, getEquivalentDiameter } from './fittings'
+import { getStandardDuctSize, inchesToMm, standardDuctSizes, getAllDuctSizeOptions } from './standard-sizes'
+
+/* Re-export standard sizes for use in other modules */
+export { standardDuctSizes, getStandardDuctSize, getAllDuctSizeOptions } from './standard-sizes'
 
 /* ========== CONSTANTS ========== */
 
 const GRAVITY = 9.81 /* m/s² */
-
-/* Standard duct sizes (mm) - rectangular */
-export const standardRectWidths = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200]
-export const standardRectHeights = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600]
-
-/* Standard duct sizes (mm) - round */
-export const standardRoundDiameters = [100, 125, 150, 175, 200, 225, 250, 275, 300, 350, 400, 450, 500, 550, 600, 700, 800]
 
 /* ========== UNIT CONVERSIONS ========== */
 
@@ -153,111 +151,41 @@ export function velocityPressure(velocity: number, density: number): number {
 }
 
 /**
- * Size duct for given CFM using equal friction method
+ * Size duct for given CFM using Standard Duct Sizing Table
+ * Based on Equal-Friction Method (0.10 in.wg per 100 ft)
  * @param cfm - Required airflow in CFM
- * @param targetFriction - Target friction loss in Pa/m
- * @param maxVelocity - Maximum allowed velocity in m/s
  * @param shape - 'round' or 'rectangular'
- * @param tempC - Air temperature
- * @returns Recommended duct size
+ * @returns Recommended duct size from standard table
  */
 export function sizeDuctEqualFriction(
   cfm: number,
-  targetFriction: number,
-  maxVelocity: number,
+  _targetFriction: number,
+  _maxVelocity: number,
   shape: 'round' | 'rectangular',
-  tempC = 20
+  _tempC = 20
 ): DuctDimensions {
-  const flowM3s = cfmToM3s(cfm)
-  const density = calculateAirDensity(tempC)
-  const viscosity = calculateAirViscosity(tempC)
+  const stdSize = getStandardDuctSize(cfm, shape)
   
   if (shape === 'round') {
-    /* Iterate to find diameter that gives target friction */
-    for (const diameter of standardRoundDiameters) {
-      const duct: DuctDimensions = { shape: 'round', diameter }
-      const area = ductArea(duct)
-      const velocity = flowM3s / area
-      
-      if (velocity > maxVelocity) continue
-      
-      const Dh = diameter / 1000
-      const Re = reynoldsNumber(velocity, Dh, density, viscosity)
-      const f = frictionFactor(Re, Dh)
-      const friction = frictionLoss(velocity, Dh, density, f)
-      
-      if (friction <= targetFriction) {
-        return duct
-      }
-    }
-    /* Return largest if none found */
-    return { shape: 'round', diameter: standardRoundDiameters[standardRoundDiameters.length - 1]! }
+    const size = stdSize.sizeInMm as { diameter: number }
+    return { shape: 'round', diameter: size.diameter }
   } else {
-    /* Rectangular - try combinations */
-    let bestDuct: DuctDimensions = { shape: 'rectangular', width: 200, height: 200 }
-    let bestFrictionDiff = Infinity
-    
-    for (const width of standardRectWidths) {
-      for (const height of standardRectHeights) {
-        const duct: DuctDimensions = { shape: 'rectangular', width, height }
-        const area = ductArea(duct)
-        const velocity = flowM3s / area
-        
-        if (velocity > maxVelocity) continue
-        
-        const Dh = hydraulicDiameter(duct)
-        const Re = reynoldsNumber(velocity, Dh, density, viscosity)
-        const f = frictionFactor(Re, Dh)
-        const friction = frictionLoss(velocity, Dh, density, f)
-        
-        const diff = Math.abs(friction - targetFriction)
-        if (diff < bestFrictionDiff && friction <= targetFriction * 1.1) {
-          bestFrictionDiff = diff
-          bestDuct = duct
-        }
-      }
-    }
-    return bestDuct
+    const size = stdSize.sizeInMm as { width: number; height: number }
+    return { shape: 'rectangular', width: size.width, height: size.height }
   }
 }
 
 /**
  * Size duct for given CFM using velocity method
+ * Now uses standard duct sizing table for consistency
  */
 export function sizeDuctVelocity(
   cfm: number,
-  targetVelocity: number,
+  _targetVelocity: number,
   shape: 'round' | 'rectangular'
 ): DuctDimensions {
-  const flowM3s = cfmToM3s(cfm)
-  const requiredArea = flowM3s / targetVelocity /* m² */
-  
-  if (shape === 'round') {
-    const requiredDiameter = Math.sqrt(requiredArea * 4 / Math.PI) * 1000 /* mm */
-    const diameter = standardRoundDiameters.find(d => d >= requiredDiameter) 
-      ?? standardRoundDiameters[standardRoundDiameters.length - 1]!
-    return { shape: 'round', diameter }
-  } else {
-    /* Find rectangular with similar area and reasonable aspect ratio */
-    let bestDuct: DuctDimensions = { shape: 'rectangular', width: 200, height: 200 }
-    let bestAreaDiff = Infinity
-    
-    for (const width of standardRectWidths) {
-      for (const height of standardRectHeights) {
-        const aspectRatio = width / height
-        if (aspectRatio > 4 || aspectRatio < 0.25) continue /* Limit aspect ratio */
-        
-        const area = (width / 1000) * (height / 1000)
-        const diff = Math.abs(area - requiredArea)
-        
-        if (area >= requiredArea && diff < bestAreaDiff) {
-          bestAreaDiff = diff
-          bestDuct = { shape: 'rectangular', width, height }
-        }
-      }
-    }
-    return bestDuct
-  }
+  /* Use standard sizing table - same as equal friction method */
+  return sizeDuctEqualFriction(cfm, 0, 0, shape)
 }
 
 /* ========== SYSTEM CALCULATIONS ========== */

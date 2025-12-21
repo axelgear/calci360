@@ -29,6 +29,7 @@ const props = defineProps<{
     sourceHandle?: string | null
     targetHandle?: string | null
     length: number
+    insulated?: boolean
     fittings?: Array<{ fittingId: string; quantity: number }>
     calculated?: { cfm?: number; velocity?: number }
   }>
@@ -124,7 +125,7 @@ function hasWarning(seg: typeof props.segments[0]): boolean {
   return seg.calculated.velocity > props.maxVelocity
 }
 
-/* Build edge label with length, CFM and fittings count */
+/* Build edge label with length, CFM, fittings count and insulation */
 function buildEdgeLabel(seg: typeof props.segments[0]): string {
   const parts: string[] = []
   /* Always show length */
@@ -135,6 +136,10 @@ function buildEdgeLabel(seg: typeof props.segments[0]): string {
   const fittingCount = seg.fittings?.reduce((sum, f) => sum + f.quantity, 0) ?? 0
   if (fittingCount > 0) {
     parts.push(`🔧${fittingCount}`)
+  }
+  /* Show shield icon if insulated */
+  if (seg.insulated) {
+    parts.push(`🛡️`)
   }
   return parts.join(' | ')
 }
