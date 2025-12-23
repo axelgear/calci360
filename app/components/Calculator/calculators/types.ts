@@ -114,9 +114,21 @@ export interface DuctSizingCalculatorConfig {
 }
 
 /**
+ * Bending stress calculator configuration
+ */
+export interface BendingStressCalculatorConfig {
+  type: 'bending-stress'
+  name: string
+  description: string
+  category: string
+  icon: string
+  keywords: string[]
+}
+
+/**
  * Union type for all calculator configs
  */
-export type CalculatorConfig = ConverterConfig | GeometryCalculatorConfig | MetalWeightCalculatorConfig | HvacDuctCalculatorConfig | DuctSizingCalculatorConfig
+export type CalculatorConfig = ConverterConfig | GeometryCalculatorConfig | MetalWeightCalculatorConfig | HvacDuctCalculatorConfig | DuctSizingCalculatorConfig | BendingStressCalculatorConfig
 
 /**
  * Type guard to check if config is a converter
@@ -151,6 +163,13 @@ export function isHvacDuctCalculatorConfig(config: CalculatorConfig): config is 
  */
 export function isDuctSizingCalculatorConfig(config: CalculatorConfig): config is DuctSizingCalculatorConfig {
   return config.type === 'duct-sizing'
+}
+
+/**
+ * Type guard to check if config is a bending stress calculator
+ */
+export function isBendingStressCalculatorConfig(config: CalculatorConfig): config is BendingStressCalculatorConfig {
+  return config.type === 'bending-stress'
 }
 
 /**

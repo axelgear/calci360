@@ -51,6 +51,9 @@ import { metalWeightCalculator } from './metal-weight'
 import { hvacDuctCalculator } from './hvac'
 import { ductSizingCalculator } from './hvac/duct-sizing'
 
+/* Import structural engineering calculators */
+import { bendingStressCalculator } from './bending-stress'
+
 /**
  * Registry of all available calculators
  * Key is the URL slug, value is the calculator configuration
@@ -66,6 +69,9 @@ export const calculators: Record<string, CalculatorConfig> = {
   /* ============ HVAC Calculators ============ */
   'duct-heat-loss-calculator': hvacDuctCalculator,
   'duct-sizing-calculator': ductSizingCalculator,
+  
+  /* ============ Structural Engineering Calculators ============ */
+  'bending-stress-calculator': bendingStressCalculator,
   
   /* ============ Unit Converters ============ */
   
