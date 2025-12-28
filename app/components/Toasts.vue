@@ -3,31 +3,56 @@ import { ref } from 'vue'
 
 export interface Toast {
   id: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  title: string
-  message?: string
+  type?: 'success' | 'error' | 'warning' | 'info'
+  title?: string
+  message: string
   duration?: number
+  action?: {
+    label: string
+    handler: () => void
+  }
 }
+
+interface Props {
+  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
+  maxToasts?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  position: 'bottom-right',
+  maxToasts: 5
+})
 
 const toasts = ref<Toast[]>([])
 
+/* Add a new toast */
 const addToast = (toast: Omit<Toast, 'id'>) => {
   const id = Date.now().toString()
   const newToast: Toast = {
-    ...toast,
     id,
-    duration: toast.duration || 5000,
+    type: 'info',
+    duration: 5000,
+    ...toast
   }
   
   toasts.value.push(newToast)
   
+  /* Limit number of toasts */
+  if (toasts.value.length > props.maxToasts) {
+    toasts.value.shift()
+  }
+
+  /* Auto remove after duration */
   if (newToast.duration && newToast.duration > 0) {
     setTimeout(() => {
       removeToast(id)
     }, newToast.duration)
   }
+
+  return id
 }
 
+/* Remove a toast */
 const removeToast = (id: string) => {
   const index = toasts.value.findIndex(t => t.id === id)
   if (index > -1) {
@@ -35,43 +60,58 @@ const removeToast = (id: string) => {
   }
 }
 
-// Expose methods for external use
-defineExpose({
-  addToast,
-  removeToast,
-})
-
-const getIcon = (type: Toast['type']) => {
+/* Toast icons */
+const getToastIcon = (type?: string) => {
   switch (type) {
     case 'success': return 'check_circle'
     case 'error': return 'error'
     case 'warning': return 'warning'
     case 'info': return 'info'
+    default: return 'info'
   }
 }
+
+/* Expose methods for external use */
+defineExpose({
+  addToast,
+  removeToast
+})
 </script>
 
 <template>
   <Teleport to="body">
-    <div class="toasts-container">
-      <TransitionGroup name="toast">
+    <div 
+      class="toasts-container"
+      :class="`toasts-container--${position}`"
+    >
+      <TransitionGroup name="toast" tag="div">
         <div
           v-for="toast in toasts"
           :key="toast.id"
           class="toast"
-          :class="`toast--${toast.type}`"
+          :class="`toast--${toast.type || 'info'}`"
         >
-          <div class="toast__icon">
-            <span class="material-icons">{{ getIcon(toast.type) }}</span>
+          <span class="toast-icon material-icons">
+            {{ getToastIcon(toast.type) }}
+          </span>
+          
+          <div class="toast-content">
+            <h4 v-if="toast.title" class="toast-title">{{ toast.title }}</h4>
+            <p class="toast-message">{{ toast.message }}</p>
           </div>
-          <div class="toast__content">
-            <h4 class="toast__title">{{ toast.title }}</h4>
-            <p v-if="toast.message" class="toast__message">{{ toast.message }}</p>
-          </div>
+
           <button
-            type="button"
-            class="toast__close"
+            v-if="toast.action"
+            class="toast-action"
+            @click="toast.action.handler"
+          >
+            {{ toast.action.label }}
+          </button>
+
+          <button
+            class="toast-close"
             @click="removeToast(toast.id)"
+            aria-label="Close notification"
           >
             <span class="material-icons">close</span>
           </button>
@@ -84,18 +124,40 @@ const getIcon = (type: Toast['type']) => {
 <style scoped lang="scss">
 .toasts-container {
   position: fixed;
-  top: 1rem;
-  right: 1rem;
   z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 400px;
-  
-  @include phone {
-    left: 1rem;
-    right: 1rem;
-    max-width: none;
+  pointer-events: none;
+  padding: 1rem;
+
+  &--top-left {
+    top: 0;
+    left: 0;
+  }
+
+  &--top-center {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &--top-right {
+    top: 0;
+    right: 0;
+  }
+
+  &--bottom-left {
+    bottom: 0;
+    left: 0;
+  }
+
+  &--bottom-center {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &--bottom-right {
+    bottom: 0;
+    right: 0;
   }
 }
 
@@ -103,103 +165,115 @@ const getIcon = (type: Toast['type']) => {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+  min-width: 20rem;
+  max-width: 30rem;
   padding: 1rem;
+  margin-bottom: 0.75rem;
   background: var(--card);
-  border: 1px solid rgb(var(--accent-500-rgb) / 20%);
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  pointer-events: auto;
   
   &--success {
-    border-color: rgb(16 185 129 / 30%);
+    border-left: 4px solid #10b981;
     
-    .toast__icon {
-      background: rgb(16 185 129 / 15%);
+    .toast-icon {
       color: #10b981;
     }
   }
   
   &--error {
-    border-color: rgb(239 68 68 / 30%);
+    border-left: 4px solid #ef4444;
     
-    .toast__icon {
-      background: rgb(239 68 68 / 15%);
+    .toast-icon {
       color: #ef4444;
     }
   }
   
   &--warning {
-    border-color: rgb(245 158 11 / 30%);
+    border-left: 4px solid #f59e0b;
     
-    .toast__icon {
-      background: rgb(245 158 11 / 15%);
+    .toast-icon {
       color: #f59e0b;
     }
   }
   
   &--info {
-    border-color: rgb(59 130 246 / 30%);
+    border-left: 4px solid #3b82f6;
     
-    .toast__icon {
-      background: rgb(59 130 246 / 15%);
+    .toast-icon {
       color: #3b82f6;
     }
   }
 }
 
-.toast__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
+.toast-icon {
+  font-size: 1.5rem;
   flex-shrink: 0;
-  
-  .material-icons {
-    font-size: 1.25rem;
-  }
 }
 
-.toast__content {
+.toast-content {
   flex: 1;
   min-width: 0;
 }
 
-.toast__title {
-  margin: 0 0 0.25rem;
-  font-size: 0.95rem;
+.toast-title {
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
+  margin: 0 0 0.25rem;
 }
 
-.toast__message {
-  margin: 0;
+.toast-message {
   font-size: 0.875rem;
-  color: var(--text);
-  opacity: 0.75;
-  line-height: 1.4;
+  color: rgba(var(--text-rgb), 0.8);
+  margin: 0;
+  line-height: 1.5;
 }
 
-.toast__close {
+.toast-action {
+  flex-shrink: 0;
+  padding: 0.25rem 0.75rem;
+  background: none;
+  border: 1px solid rgba(var(--text-rgb), 0.2);
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent-500);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(var(--accent-500-rgb), 0.1);
+    border-color: var(--accent-500);
+  }
+}
+
+.toast-close {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  background: transparent;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  background: none;
   border: none;
-  color: var(--text);
-  opacity: 0.5;
+  border-radius: 50%;
   cursor: pointer;
-  transition: opacity 0.2s;
-  flex-shrink: 0;
-  
-  &:hover {
-    opacity: 1;
+  transition: all 0.2s;
+
+  .material-icons {
+    font-size: 1rem;
+    color: rgba(var(--text-rgb), 0.5);
   }
   
+  &:hover {
+    background: rgba(var(--text-rgb), 0.1);
+  
   .material-icons {
-    font-size: 1.1rem;
+      color: var(--text);
+    }
   }
 }
 
@@ -222,7 +296,34 @@ const getIcon = (type: Toast['type']) => {
   opacity: 0;
 }
 
-.toast-move {
-  transition: transform 0.3s ease;
+/* Adjust for left-side positions */
+.toasts-container--top-left,
+.toasts-container--bottom-left {
+  .toast-enter-from,
+  .toast-leave-to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Adjust for center positions */
+.toasts-container--top-center,
+.toasts-container--bottom-center {
+  .toast-enter-from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  .toast-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .toast {
+    min-width: 0;
+    max-width: calc(100vw - 2rem);
+  }
 }
 </style>

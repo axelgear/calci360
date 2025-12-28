@@ -1,27 +1,54 @@
 <script setup lang="ts">
+import { computed, useSlots } from 'vue'
+
 interface Props {
-  type?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
-  size?: 'small' | 'medium' | 'large'
-  rounded?: boolean
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
+  size?: 'sm' | 'md' | 'lg'
+  dot?: boolean
+  count?: number | string
+  maxCount?: number
+  showZero?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
-  type: 'default',
-  size: 'medium',
-  rounded: true,
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'default',
+  size: 'md',
+  dot: false,
+  maxCount: 99,
+  showZero: false
+})
+
+const displayCount = computed(() => {
+  if (props.dot) return ''
+  if (typeof props.count === 'string') return props.count
+  if (typeof props.count === 'number') {
+    return props.count > props.maxCount ? `${props.maxCount}+` : props.count.toString()
+  }
+  return ''
+})
+
+const slots = useSlots()
+
+const showBadge = computed(() => {
+  if (props.dot) return true
+  if (props.count === 0 && !props.showZero) return false
+  return props.count !== undefined || slots.default
 })
 </script>
 
 <template>
-  <span 
+  <span v-if="showBadge" 
     class="badge" 
     :class="[
-      `badge--${type}`,
+      `badge--${variant}`,
       `badge--${size}`,
-      { 'badge--rounded': rounded }
+      { 
+        'badge--dot': dot,
+        'badge--count': !dot && count !== undefined
+      }
     ]"
   >
-    <slot />
+    <slot>{{ displayCount }}</slot>
   </span>
 </template>
 
@@ -31,35 +58,74 @@ withDefaults(defineProps<Props>(), {
   align-items: center;
   justify-content: center;
   font-weight: 600;
+  line-height: 1;
   white-space: nowrap;
+  text-align: center;
+  border-radius: 999px;
   transition: all 0.2s;
   
-  /* Sizes */
-  &--small {
-    padding: 0.2rem 0.5rem;
+  /* Size variants */
+  &--sm {
+    padding: 0.125rem 0.375rem;
+    font-size: 0.625rem;
+    min-width: 1rem;
+    height: 1rem;
+  }
+
+  &--md {
+    padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
+    min-width: 1.25rem;
+    height: 1.25rem;
   }
   
-  &--medium {
-    padding: 0.35rem 0.75rem;
-    font-size: 0.85rem;
+  &--lg {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+    min-width: 1.5rem;
+    height: 1.5rem;
   }
   
-  &--large {
-    padding: 0.5rem 1rem;
-    font-size: 0.95rem;
+  /* Dot variant */
+  &--dot {
+    padding: 0;
+    min-width: 0;
+    
+    &.badge--sm {
+      width: 0.375rem;
+      height: 0.375rem;
+    }
+    
+    &.badge--md {
+      width: 0.5rem;
+      height: 0.5rem;
+    }
+    
+    &.badge--lg {
+      width: 0.625rem;
+      height: 0.625rem;
+    }
   }
   
-  /* Rounded */
-  &--rounded {
-    border-radius: 999px;
+  /* Count badge specific */
+  &--count {
+    &.badge--sm {
+      min-width: 1rem;
+    }
+    
+    &.badge--md {
+      min-width: 1.25rem;
+    }
+    
+    &.badge--lg {
+      min-width: 1.5rem;
+    }
   }
   
-  /* Types */
+  /* Color variants */
   &--default {
-    background: var(--card);
+    background: rgba(var(--text-rgb), 0.1);
     color: var(--text);
-    border: 1px solid rgb(var(--accent-500-rgb) / 20%);
   }
   
   &--primary {
@@ -86,5 +152,19 @@ withDefaults(defineProps<Props>(), {
     background: #3b82f6;
     color: white;
   }
+}
+
+/* Animation for appearing */
+@keyframes badge-zoom-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.badge {
+  animation: badge-zoom-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

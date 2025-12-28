@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 
 interface Props {
   modelValue: number
@@ -15,176 +15,296 @@ const props = withDefaults(defineProps<Props>(), {
   min: 0,
   max: 100,
   step: 1,
-  showValue: true,
-  disabled: false,
+  showValue: false,
+  disabled: false
 })
 
 const emit = defineEmits<{
   'update:modelValue': [value: number]
+  'change': [value: number]
 }>()
 
-const sliderRef = ref<HTMLDivElement>()
+const trackRef = ref<HTMLDivElement>()
 const isDragging = ref(false)
 
+/* Computed values */
 const percentage = computed(() => {
   const range = props.max - props.min
-  const value = props.modelValue - props.min
-  return (value / range) * 100
+  return ((props.modelValue - props.min) / range) * 100
 })
 
-const updateValue = (event: MouseEvent | TouchEvent) => {
-  if (!sliderRef.value || props.disabled) return
+const displayValue = computed(() => {
+  return props.step % 1 === 0 
+    ? Math.round(props.modelValue)
+    : props.modelValue.toFixed(1)
+})
 
-  const rect = sliderRef.value.getBoundingClientRect()
-  const clientX = 'touches' in event ? event.touches[0]?.clientX || 0 : event.clientX
-  const x = Math.max(0, Math.min(clientX - rect.left, rect.width))
-  const percentage = x / rect.width
+/* Update value based on position */
+const updateValue = (clientX: number) => {
+  if (!trackRef.value || props.disabled) return
+
+  const rect = trackRef.value.getBoundingClientRect()
+  const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
   const range = props.max - props.min
-  const rawValue = props.min + percentage * range
-  const steppedValue = Math.round(rawValue / props.step) * props.step
-  const clampedValue = Math.max(props.min, Math.min(props.max, steppedValue))
+  let value = props.min + (range * percent)
+  
+  /* Snap to step */
+  if (props.step > 0) {
+    value = Math.round(value / props.step) * props.step
+  }
+  
+  value = Math.max(props.min, Math.min(props.max, value))
 
-  emit('update:modelValue', clampedValue)
+  emit('update:modelValue', value)
 }
 
-const startDrag = (event: MouseEvent | TouchEvent) => {
+/* Mouse events */
+const handleMouseDown = (event: MouseEvent) => {
   if (props.disabled) return
   isDragging.value = true
-  updateValue(event)
+  updateValue(event.clientX)
   
-  const moveHandler = (e: MouseEvent | TouchEvent) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (isDragging.value) {
-      updateValue(e)
+      updateValue(e.clientX)
     }
   }
   
-  const endHandler = () => {
+  const handleMouseUp = () => {
     isDragging.value = false
-    document.removeEventListener('mousemove', moveHandler)
-    document.removeEventListener('mouseup', endHandler)
-    document.removeEventListener('touchmove', moveHandler)
-    document.removeEventListener('touchend', endHandler)
+    emit('change', props.modelValue)
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
   }
   
-  document.addEventListener('mousemove', moveHandler)
-  document.addEventListener('mouseup', endHandler)
-  document.addEventListener('touchmove', moveHandler)
-  document.addEventListener('touchend', endHandler)
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
+  }
+  
+/* Touch events */
+const handleTouchStart = (event: TouchEvent) => {
+  if (props.disabled || !event.touches[0]) return
+  const touch = event.touches[0]
+  updateValue(touch.clientX)
+}
+
+const handleTouchMove = (event: TouchEvent) => {
+  if (props.disabled || !event.touches[0]) return
+  const touch = event.touches[0]
+  updateValue(touch.clientX)
+}
+
+/* Keyboard events */
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (props.disabled) return
+  
+  let newValue = props.modelValue
+  const step = props.step || 1
+  
+  switch (event.key) {
+    case 'ArrowLeft':
+    case 'ArrowDown':
+      newValue -= step
+      break
+    case 'ArrowRight':
+    case 'ArrowUp':
+      newValue += step
+      break
+    case 'Home':
+      newValue = props.min
+      break
+    case 'End':
+      newValue = props.max
+      break
+    default:
+      return
+  }
+  
+  event.preventDefault()
+  newValue = Math.max(props.min, Math.min(props.max, newValue))
+  emit('update:modelValue', newValue)
+  emit('change', newValue)
 }
 </script>
 
 <template>
-  <div class="slider-wrapper" :class="{ 'slider-wrapper--disabled': disabled }">
-    <div v-if="label || showValue" class="slider-header">
-      <label v-if="label" class="slider-label">{{ label }}</label>
-      <span v-if="showValue" class="slider-value">{{ modelValue }}</span>
-    </div>
     <div 
-      ref="sliderRef"
       class="slider"
-      :class="{ 'slider--dragging': isDragging }"
-      @mousedown="startDrag"
-      @touchstart="startDrag"
-    >
-      <div class="slider__track" />
+    :class="{ 'slider--disabled': disabled }"
+  >
+    <label v-if="label" class="slider-label">{{ label }}</label>
+    <div class="slider-wrapper">
       <div 
-        class="slider__fill" 
+        ref="trackRef"
+        class="slider-track"
+        @mousedown="handleMouseDown"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+      >
+      <div 
+          class="slider-fill" 
         :style="{ width: `${percentage}%` }"
       />
-      <div 
-        class="slider__thumb"
+        <button
+          type="button"
+          class="slider-thumb"
         :style="{ left: `${percentage}%` }"
-      />
+          :class="{ 'slider-thumb--dragging': isDragging }"
+          tabindex="0"
+          role="slider"
+          :aria-valuemin="min"
+          :aria-valuemax="max"
+          :aria-valuenow="modelValue"
+          :aria-label="label"
+          @keydown="handleKeyDown"
+        />
+      </div>
+      <span v-if="showValue" class="slider-value">{{ displayValue }}</span>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.slider-wrapper {
+/* Size variables */
+$track-height: 4px;
+$thumb-size: 16px;
+$thumb-hover-size: 18px;
+$thumb-active-size: 20px;
+
+.slider {
   width: 100%;
   
   &--disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     
-    .slider {
+    .slider-track,
+    .slider-thumb {
       cursor: not-allowed;
     }
   }
 }
 
-.slider-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
 .slider-label {
+  display: block;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text);
+  margin-bottom: 0.75rem;
 }
 
-.slider-value {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--accent-500);
-  background: var(--card);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  border: 1px solid rgb(var(--accent-500-rgb) / 20%);
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.slider {
+.slider-track {
   position: relative;
-  height: 2rem;
+  flex: 1;
+  height: $track-height;
+  background: rgba(var(--text-rgb), 0.15);
+  border-radius: calc($track-height / 2);
   cursor: pointer;
   
-  &--dragging {
-    .slider__thumb {
-      transform: translate(-50%, -50%) scale(1.2);
-    }
+  /* Add padding to make clicking easier */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    bottom: -8px;
+    left: 0;
+    right: 0;
   }
 }
 
-.slider__track {
+.slider-fill {
   position: absolute;
-  top: 50%;
+  top: 0;
   left: 0;
-  right: 0;
-  height: 0.375rem;
-  background: var(--card);
-  border: 1px solid rgb(var(--accent-500-rgb) / 15%);
-  border-radius: 999px;
-  transform: translateY(-50%);
-}
-
-.slider__fill {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  height: 0.375rem;
+  height: 100%;
   background: var(--accent-500);
-  border-radius: 999px;
-  transform: translateY(-50%);
+  border-radius: calc($track-height / 2);
+  pointer-events: none;
   transition: width 0.1s ease-out;
 }
 
-.slider__thumb {
+.slider-thumb {
   position: absolute;
   top: 50%;
-  width: 1.25rem;
-  height: 1.25rem;
-  background: white;
-  border: 2px solid var(--accent-500);
+  width: $thumb-size;
+  height: $thumb-size;
+  padding: 0;
+  background: var(--accent-500);
+  border: none;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition: transform 0.1s ease-out;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+  cursor: grab;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease-out;
   
-  &:hover {
-    transform: translate(-50%, -50%) scale(1.1);
+  /* Remove default button styles */
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:hover:not(:disabled) {
+    width: $thumb-hover-size;
+    height: $thumb-hover-size;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--accent-500-rgb), 0.3);
+  }
+
+  &--dragging,
+  &:active:not(:disabled) {
+    cursor: grabbing;
+    width: $thumb-active-size;
+    height: $thumb-active-size;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.slider-value {
+  min-width: 3ch;
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Touch device adjustments */
+@media (hover: none) {
+  .slider-thumb {
+    width: $thumb-active-size;
+    height: $thumb-active-size;
+  }
+  
+  .slider-track {
+    height: 6px;
+  }
+}
+
+/* Dark mode adjustments */
+.dark {
+  .slider-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .slider-thumb {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    
+    &:hover:not(:disabled) {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    }
+    
+    &--dragging,
+    &:active:not(:disabled) {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    }
   }
 }
 </style>

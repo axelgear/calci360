@@ -105,3 +105,6 @@ export const volumeUnitsFull: UnitOption[] = [
 
 /** Default volume unit */
 export const defaultVolumeUnit: UnitOption = { id: 'cubic-meter', name: 'Cubic Meter', symbol: 'm³', toBase: 1 }
+
+/** Main export for volumeUnits - alias for volumeUnitsCommon */
+export const volumeUnits = volumeUnitsCommon

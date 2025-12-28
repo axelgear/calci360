@@ -1,122 +1,335 @@
 <script setup lang="ts">
-export interface TableColumn {
+import { ref, computed } from 'vue'
+
+interface Column {
   key: string
   label: string
+  sortable?: boolean
   align?: 'left' | 'center' | 'right'
   width?: string
-  mono?: boolean
+  formatter?: (value: any) => string
 }
 
-export interface TableRow {
-  [key: string]: string | number | boolean | undefined
-  _highlight?: boolean
-}
-
-const props = defineProps<{
-  columns: TableColumn[]
-  rows: TableRow[]
+interface Props {
+  columns: Column[]
+  data: Record<string, any>[]
+  sortable?: boolean
+  searchable?: boolean
   striped?: boolean
   hoverable?: boolean
-  compact?: boolean
-}>()
+  bordered?: boolean
+  loading?: boolean
+  emptyText?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  sortable: true,
+  searchable: false,
+  striped: true,
+  hoverable: true,
+  bordered: true,
+  loading: false,
+  emptyText: 'No data available'
+})
+
+const sortKey = ref<string | null>(null)
+const sortOrder = ref<'asc' | 'desc'>('asc')
+const searchQuery = ref('')
+
+/* Filtered and sorted data */
+const processedData = computed(() => {
+  let result = [...props.data]
+
+  /* Filter by search query */
+  if (props.searchable && searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(row => 
+      Object.values(row).some(value => 
+        String(value).toLowerCase().includes(query)
+      )
+    )
+  }
+
+  /* Sort data */
+  if (sortKey.value) {
+    result.sort((a, b) => {
+      const aVal = a[sortKey.value!]
+      const bVal = b[sortKey.value!]
+      
+      let comparison = 0
+      if (aVal < bVal) comparison = -1
+      if (aVal > bVal) comparison = 1
+      
+      return sortOrder.value === 'asc' ? comparison : -comparison
+    })
+  }
+
+  return result
+})
+
+/* Handle sorting */
+const handleSort = (column: Column) => {
+  if (!column.sortable || !props.sortable) return
+
+  if (sortKey.value === column.key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortKey.value = column.key
+    sortOrder.value = 'asc'
+  }
+}
+
+/* Get cell value with optional formatter */
+const getCellValue = (row: Record<string, any>, column: Column) => {
+  const value = row[column.key]
+  return column.formatter ? column.formatter(value) : value
+}
 </script>
 
 <template>
-  <div class="table-wrapper" :class="{ compact }">
-    <table :class="{ striped, hoverable }">
+  <div class="data-table-wrapper">
+    <!-- Search -->
+    <div v-if="searchable" class="data-table-search">
+      <input
+        v-model="searchQuery"
+        type="text"
+        class="search-input"
+        placeholder="Search..."
+      />
+      <span class="material-icons search-icon">search</span>
+    </div>
+
+    <!-- Table -->
+    <div class="data-table-container">
+      <table 
+        class="data-table"
+        :class="{
+          'data-table--striped': striped,
+          'data-table--hoverable': hoverable,
+          'data-table--bordered': bordered
+        }"
+      >
       <thead>
         <tr>
           <th
-            v-for="col in columns"
-            :key="col.key"
-            :style="{ textAlign: col.align || 'left', width: col.width }"
-          >
-            {{ col.label }}
+              v-for="column in columns"
+              :key="column.key"
+              class="table-header"
+              :class="[
+                `text-${column.align || 'left'}`,
+                { 'table-header--sortable': column.sortable && sortable }
+              ]"
+              :style="{ width: column.width }"
+              @click="handleSort(column)"
+            >
+              <div class="header-content">
+                <span>{{ column.label }}</span>
+                <span
+                  v-if="column.sortable && sortable"
+                  class="sort-icon material-icons"
+                  :class="{
+                    'sort-icon--active': sortKey === column.key,
+                    'sort-icon--desc': sortKey === column.key && sortOrder === 'desc'
+                  }"
+                >
+                  arrow_upward
+                </span>
+              </div>
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, idx) in rows" :key="idx" :class="{ highlight: row._highlight }">
+          <tr v-if="loading" class="loading-row">
+            <td :colspan="columns.length" class="loading-cell">
+              <div class="loading-spinner"></div>
+              <span>Loading...</span>
+            </td>
+          </tr>
+          <tr v-else-if="processedData.length === 0" class="empty-row">
+            <td :colspan="columns.length" class="empty-cell">
+              {{ emptyText }}
+            </td>
+          </tr>
+          <tr v-else v-for="(row, index) in processedData" :key="index">
           <td
-            v-for="col in columns"
-            :key="col.key"
-            :style="{ textAlign: col.align || 'left' }"
-            :class="{ mono: col.mono, exact: row[col.key] === 'Exact' }"
-            v-html="row[col.key]"
-          />
+              v-for="column in columns"
+              :key="column.key"
+              class="table-cell"
+              :class="`text-${column.align || 'left'}`"
+            >
+              {{ getCellValue(row, column) }}
+            </td>
         </tr>
       </tbody>
     </table>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.table-wrapper {
-  overflow-x: auto;
-  margin: 1.5rem 0;
-  border-radius: 1rem;
-  border: 1px solid rgb(var(--accent-500-rgb) / 15%);
-  
-  &.compact {
-    table {
-      font-size: 0.85rem;
-      
-      th, td {
-        padding: 0.625rem 0.875rem;
-      }
+.data-table-wrapper {
+  width: 100%;
+}
+
+.data-table-search {
+  position: relative;
+  margin-bottom: 1rem;
+
+  .search-input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    background: var(--card);
+    border: 1px solid rgba(var(--text-rgb), 0.2);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent-500);
     }
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    color: rgba(var(--text-rgb), 0.5);
   }
 }
 
-table {
+.data-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--card);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+.data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-  
-  th, td {
-    padding: 0.875rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid rgb(var(--accent-500-rgb) / 10%);
+  font-size: 0.875rem;
+
+  &--bordered {
+    border: 1px solid rgba(var(--text-rgb), 0.1);
+
+    th,
+    td {
+      border: 1px solid rgba(var(--text-rgb), 0.1);
+    }
   }
-  
-  th {
-    background: rgb(var(--accent-500-rgb) / 8%);
+
+  &--striped tbody tr:nth-child(even) {
+    background: rgba(var(--text-rgb), 0.02);
+  }
+
+  &--hoverable tbody tr:hover {
+    background: rgba(var(--accent-500-rgb), 0.05);
+  }
+}
+
+.table-header {
+  padding: 0.75rem 1rem;
+  background: rgba(var(--text-rgb), 0.05);
     font-weight: 600;
     color: var(--text);
+  text-align: left;
     white-space: nowrap;
+
+  &--sortable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      background: rgba(var(--text-rgb), 0.08);
+    }
   }
-  
-  td {
+
+  &.text-center {
+    text-align: center;
+  }
+
+  &.text-right {
+    text-align: right;
+  }
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-icon {
+  font-size: 1rem;
+  color: rgba(var(--text-rgb), 0.3);
+  transition: all 0.2s;
+
+  &--active {
+    color: var(--accent-500);
+  }
+
+  &--desc {
+    transform: rotate(180deg);
+  }
+}
+
+.table-cell {
+  padding: 0.75rem 1rem;
     color: var(--text);
     
-    &.exact {
-      color: #10b981;
-      font-weight: 600;
+  &.text-center {
+    text-align: center;
+  }
+
+  &.text-right {
+    text-align: right;
     }
-    
-    &.mono {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
+}
+
+.loading-row,
+.empty-row {
+  td {
+    padding: 2rem;
+    text-align: center;
+    color: rgba(var(--text-rgb), 0.5);
     }
   }
   
-  &.hoverable tbody tr {
-    transition: background 0.2s;
-    
-    &:hover {
-      background: rgb(var(--accent-500-rgb) / 5%);
+.loading-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.loading-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(var(--accent-500-rgb), 0.2);
+  border-top-color: var(--accent-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
     }
+    
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  tbody tr {
-    &:last-child td {
-      border-bottom: none;
-    }
-    
-    &.highlight td {
-      background: rgb(var(--accent-500-rgb) / 8%);
-    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .data-table {
+    font-size: 0.75rem;
+  }
+
+  .table-header,
+  .table-cell {
+    padding: 0.5rem 0.75rem;
   }
 }
 </style>
-

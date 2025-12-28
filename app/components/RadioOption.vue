@@ -1,21 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface Props {
-  modelValue: string | number
-  value: string | number
-  title: string
+  modelValue: any
+  value: any
+  label?: string
   description?: string
-  icon?: string
   disabled?: boolean
+  icon?: string
 }
 
 const props = defineProps<Props>()
+
 const emit = defineEmits<{
-  'update:modelValue': [value: string | number]
+  'update:modelValue': [value: any]
 }>()
 
-const isSelected = computed(() => props.modelValue === props.value)
+const isChecked = computed(() => props.modelValue === props.value)
 
-const select = () => {
+const handleSelect = () => {
   if (!props.disabled) {
     emit('update:modelValue', props.value)
   }
@@ -23,124 +26,131 @@ const select = () => {
 </script>
 
 <template>
-  <div 
+  <label 
     class="radio-option" 
     :class="{ 
-      'radio-option--selected': isSelected,
+      'radio-option--checked': isChecked,
       'radio-option--disabled': disabled 
     }"
-    @click="select"
+    @click="handleSelect"
   >
-    <div v-if="icon" class="radio-option__icon">
-      <span class="material-icons">{{ icon }}</span>
+    <div class="radio-option-header">
+      <span class="radio-control">
+        <span class="radio-dot"></span>
+      </span>
+      
+      <div class="radio-content">
+        <div class="radio-main">
+          <span v-if="icon" class="radio-icon material-icons">{{ icon }}</span>
+          <span v-if="label" class="radio-label">{{ label }}</span>
+          <slot v-else />
     </div>
-    <div class="radio-option__content">
-      <h4 class="radio-option__title">{{ title }}</h4>
-      <p v-if="description" class="radio-option__description">{{ description }}</p>
-    </div>
-    <div class="radio-option__indicator">
-      <div class="radio-option__circle">
-        <div class="radio-option__dot" />
+        <p v-if="description || $slots.description" class="radio-description">
+          <slot name="description">{{ description }}</slot>
+        </p>
       </div>
     </div>
-  </div>
+  </label>
 </template>
 
 <style scoped lang="scss">
 .radio-option {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  display: block;
   padding: 1rem;
   background: var(--card);
-  border: 2px solid rgb(var(--accent-500-rgb) / 15%);
-  border-radius: 0.75rem;
+  border: 2px solid rgba(var(--text-rgb), 0.1);
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
+  user-select: none;
   
-  &:hover:not(&--disabled) {
-    border-color: rgb(var(--accent-500-rgb) / 30%);
+  &:hover:not(.radio-option--disabled) {
+    border-color: rgba(var(--accent-500-rgb), 0.3);
+    background: rgba(var(--accent-500-rgb), 0.02);
   }
   
-  &--selected {
+  &--checked {
     border-color: var(--accent-500);
-    background: rgb(var(--accent-500-rgb) / 5%);
-    
-    .radio-option__dot {
-      transform: scale(1);
-      opacity: 1;
-    }
+    background: rgba(var(--accent-500-rgb), 0.05);
   }
   
   &--disabled {
-    opacity: 0.6;
     cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
-.radio-option__icon {
+.radio-option-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.radio-control {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  background: rgb(var(--accent-500-rgb) / 10%);
-  border-radius: 0.5rem;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(var(--text-rgb), 0.3);
+  border-radius: 50%;
+  background: var(--card);
   flex-shrink: 0;
-  
-  .material-icons {
-    font-size: 1.5rem;
-    color: var(--accent-500);
+  margin-top: 2px;
+  transition: border-color 0.2s, background-color 0.2s;
+
+  .radio-option:hover:not(.radio-option--disabled) & {
+    border-color: rgba(var(--text-rgb), 0.4);
+  }
+
+  .radio-option--checked & {
+    border-color: var(--accent-500);
+    background: var(--accent-500);
   }
 }
 
-.radio-option__content {
+.radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+
+  .radio-option--checked & {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.radio-content {
   flex: 1;
   min-width: 0;
 }
 
-.radio-option__title {
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text);
+.radio-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.radio-option__description {
-  margin: 0;
+.radio-icon {
+  font-size: 1.25rem;
+  color: var(--accent-500);
+}
+
+.radio-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.radio-description {
+  margin: 0.25rem 0 0;
   font-size: 0.875rem;
-  color: var(--text);
-  opacity: 0.7;
-  line-height: 1.4;
-}
-
-.radio-option__indicator {
-  flex-shrink: 0;
-}
-
-.radio-option__circle {
-  position: relative;
-  width: 1.25rem;
-  height: 1.25rem;
-  background: var(--card);
-  border: 2px solid rgb(var(--accent-500-rgb) / 30%);
-  border-radius: 50%;
-  
-  .radio-option--selected & {
-    border-color: var(--accent-500);
-  }
-}
-
-.radio-option__dot {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--accent-500);
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  transition: all 0.2s;
+  color: rgba(var(--text-rgb), 0.7);
+  line-height: 1.5;
 }
 </style>

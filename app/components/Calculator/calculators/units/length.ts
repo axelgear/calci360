@@ -164,3 +164,6 @@ export const lengthUnitsFull: UnitOption[] = [
 
 /** Default length unit */
 export const defaultLengthUnit: UnitOption = { id: 'meter', name: 'Meter', symbol: 'm', toBase: 1 }
+
+/** Main export for lengthUnits - alias for lengthUnitsCommon */
+export const lengthUnits = lengthUnitsCommon

@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { ref, computed, watch, onMounted, onBeforeUnmount, useRoute } from '#imports'
 import { useResizeObserver } from '@vueuse/core'
 import { useUiTranslator } from '@/composables/useUiTranslator'
+import { useUiTranslateStore } from '@/stores/ui-translate'
 
 const scrolled = ref(false)
+const uiStore = useUiTranslateStore()
 
 function checkScroll() {
   scrolled.value = window.scrollY > 10
@@ -20,6 +23,7 @@ const routeHideLogo = computed(() => route.meta.hideLogo as boolean | undefined)
 const { t, language, availableLanguages, setLanguage } = useUiTranslator()
 const hydrated = ref(false)
 const langOpen = ref(false)
+const themeOpen = ref(false)
 const currentLanguageLabel = computed(
   () => availableLanguages.value.find((item) => item.code === language.value)?.label || t('Language'),
 )
@@ -63,6 +67,11 @@ function toggleLangDropdown() {
 const onClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement
   if (!target.closest('.lang-switcher')) langOpen.value = false
+  if (!target.closest('.theme-switcher-trigger')) themeOpen.value = false
+}
+
+const toggleThemeDropdown = () => {
+  themeOpen.value = !themeOpen.value
 }
 
 const onScroll = () => {
@@ -144,6 +153,19 @@ watch(
         <span class="material-icons">menu_book</span>
         {{ hydrated ? t('SI Reference') : 'SI Reference' }}
       </NuxtLink>
+
+      <div class="theme-switcher-trigger">
+        <button class="theme-button" type="button" @click.stop="toggleThemeDropdown">
+          <span class="material-icons">
+            {{ uiStore.theme === 'light' ? 'light_mode' : uiStore.theme === 'dark' ? 'dark_mode' : 'brightness_auto' }}
+          </span>
+        </button>
+        <Transition name="fade">
+          <div v-if="themeOpen" class="theme-dropdown">
+            <ThemeSwitcher />
+          </div>
+        </Transition>
+      </div>
 
       <div class="lang-switcher">
         <button class="lang-trigger" type="button" @click.stop="toggleLangDropdown">
@@ -406,6 +428,69 @@ $lr-padding: 1rem;
 
       &.open {
         display: flex;
+      }
+    }
+  }
+
+  .theme-switcher-trigger {
+    position: relative;
+    height: 100%;
+    
+    .theme-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 0 0.75rem;
+      border: none;
+      background: transparent;
+      color: var(--nav-right-color);
+      cursor: pointer;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: var(--accent-500);
+      }
+      
+      &:focus-visible {
+        outline: 2px solid var(--accent-500);
+        outline-offset: 2px;
+      }
+    }
+    
+    .theme-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 0.35rem);
+      min-width: 320px;
+      border: 1px solid rgb(var(--accent-500-rgb) / 30%);
+      border-radius: 0.65rem;
+      background: color-mix(in srgb, var(--card) 85%, var(--main-bg) 15%);
+      box-shadow:
+        0 12px 24px rgb(0 0 0 / 25%),
+        0 0 0 1px rgb(var(--accent-500-rgb) / 12%);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      z-index: 110;
+    }
+    
+    @media screen and (width <= 820px) {
+      width: 100%;
+      
+      .theme-dropdown {
+        right: auto;
+        left: 0;
+        width: calc(100% - 1.5rem);
+      }
+    }
+    
+    .navigation.compact & {
+      width: 100%;
+      
+      .theme-dropdown {
+        right: auto;
+        left: 0;
+        width: calc(100% - 1.5rem);
       }
     }
   }

@@ -49,3 +49,6 @@ export const areaUnitsFull: UnitOption[] = [
 
 /** Default area unit */
 export const defaultAreaUnit: UnitOption = { id: 'square-meter', name: 'Square Meter', symbol: 'm²', toBase: 1 }
+
+/** Main export for areaUnits - alias for areaUnitsCommon */
+export const areaUnits = areaUnitsCommon

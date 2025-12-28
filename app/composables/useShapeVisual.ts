@@ -3,14 +3,10 @@
  * Provides helpers, types, and shape rendering functions for 2D, 3D, and profile shapes
  */
 
-/* ============ TYPES ============ */
+import type { Ref } from 'vue'
+import type { UnitOption } from '~/components/Calculator/calculators/units/types'
 
-export interface UnitOption {
-  id: string
-  name: string
-  symbol: string
-  toBase: number
-}
+/* ============ TYPES ============ */
 
 export interface ShapeLabel {
   x: number

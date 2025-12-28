@@ -1,3 +1,5 @@
+import { ref, computed, reactive, watch } from '#imports'
+import type { Ref } from 'vue'
 import type { MetalWeightCalculatorConfig } from '~/components/Calculator/calculators/metal-weight/types'
 import {
   metalProfiles,
@@ -9,13 +11,15 @@ import {
   type ProfileDefinition,
   type Material,
 } from '~/components/Calculator/calculators/metal-weight/types'
+import type { UnitOption } from '~/components/Calculator/calculators/units/types'
 import {
-  type UnitOption,
-  lengthUnitsCommon as lengthUnits,
-  massUnitsCommon as massUnits,
+  lengthUnits,
   defaultLengthUnit,
+} from '~/components/Calculator/calculators/units/length'
+import {
+  massUnitsCommon as massUnits,
   defaultMassUnit,
-} from '~/components/Calculator/calculators/units'
+} from '~/components/Calculator/calculators/units/mass'
 
 /* Density units (base unit: kg/m³) */
 const densityUnits: UnitOption[] = [
@@ -26,8 +30,7 @@ const densityUnits: UnitOption[] = [
 ]
 
 /* Re-export for consumers */
-export type { UnitOption }
-export { lengthUnits, massUnits, densityUnits, metalProfiles, allMaterials }
+export { massUnits, densityUnits, metalProfiles, allMaterials }
 
 export interface WeightConversionResult {
   id: string

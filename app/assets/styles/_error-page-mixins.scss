@@ -1,0 +1,113 @@
+/* Error Page Specific Mixins and Variables */
+
+/* Import base mixins */
+@use "_mixins" as *;
+
+/* Easing functions */
+$ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-out-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-out-sine: cubic-bezier(0.39, 0.575, 0.565, 1);
+$ease-out-material-emphasized: cubic-bezier(0.2, 0, 0, 1);
+
+/* Transition fallbacks */
+$fallback-transitions: opacity 0.3s, transform 0.3s;
+
+/* Font stacks */
+$english-logo-fonts: Montserrat, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+$monospace-fonts: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+
+/* Layout mixins */
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin grid-center {
+  display: grid;
+  place-items: center;
+}
+
+@mixin square($size) {
+  width: $size;
+  height: $size;
+}
+
+/* Border radius mixins */
+@mixin round-small {
+  border-radius: 0.5rem;
+}
+
+@mixin round-medium {
+  border-radius: 0.75rem;
+}
+
+@mixin round-large {
+  border-radius: 1rem;
+}
+
+/* Shadow mixins */
+@mixin card-shadow {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+@mixin card-shadow-hover {
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Color functions */
+@function c($var-name, $opacity: null) {
+  @if $opacity {
+    @return rgba(var(--#{$var-name}-rgb), $opacity);
+  }
+  @return var(--#{$var-name});
+}
+
+/* Shape mixins */
+@mixin circle {
+  border-radius: 50%;
+}
+
+@mixin fullscreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@mixin absolute-center($position: absolute, $translate: true) {
+  position: $position;
+  @if $translate {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  } @else {
+    top: 50%;
+    left: 50%;
+  }
+}
+
+@mixin triangle($size, $color, $direction: up) {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  
+  @if $direction == up {
+    border-width: 0 ($size / 2) $size ($size / 2);
+    border-color: transparent transparent $color transparent;
+  } @else if $direction == down {
+    border-width: $size ($size / 2) 0 ($size / 2);
+    border-color: $color transparent transparent transparent;
+  } @else if $direction == left {
+    border-width: ($size / 2) $size ($size / 2) 0;
+    border-color: transparent $color transparent transparent;
+  } @else if $direction == right {
+    border-width: ($size / 2) 0 ($size / 2) $size;
+    border-color: transparent transparent transparent $color;
+  }
+}

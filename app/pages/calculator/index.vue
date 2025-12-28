@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useHead, useSeoMeta } from '#app'
+import { definePageMeta } from '#imports'
 import { calculators } from '~/components/Calculator/calculators/index'
 import { isConverterConfig } from '~/components/Calculator/calculators/types'
 import { useUiTranslator } from '@/composables/useUiTranslator'
@@ -90,15 +93,15 @@ const filteredCategories = computed(() => {
   const query = searchQuery.value.toLowerCase()
   return categories.value.map(cat => ({
     ...cat,
-    calculators: cat.calculators.filter(calc => 
+    calculators: cat.calculators.filter((calc: Calculator) => 
       calc.name.toLowerCase().includes(query) ||
       calc.description.toLowerCase().includes(query)
     )
-  })).filter(cat => cat.calculators.length > 0)
+  })).filter((cat: CalculatorCategory) => cat.calculators.length > 0)
 })
 
 const totalCalculators = computed(() => 
-  categories.value.reduce((sum, cat) => sum + cat.calculators.length, 0)
+  categories.value.reduce((sum: number, cat: CalculatorCategory) => sum + cat.calculators.length, 0)
 )
 </script>
 

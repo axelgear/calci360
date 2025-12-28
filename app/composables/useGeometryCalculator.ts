@@ -1,17 +1,19 @@
+import { ref, computed, reactive, watch } from '#imports'
+import type { Ref } from 'vue'
 import type { GeometryCalculatorConfig, ShapeDefinition } from '~/components/Calculator/calculators/geometry/types'
+import type { UnitOption } from '~/components/Calculator/calculators/units/types'
 import {
-  type UnitOption,
-  lengthUnitsCommon as lengthUnits,
-  areaUnitsCommon as areaUnits,
-  volumeUnitsCommon as volumeUnits,
+  lengthUnits,
   defaultLengthUnit,
+} from '~/components/Calculator/calculators/units/length'
+import {
+  areaUnitsCommon as areaUnits,
   defaultAreaUnit,
+} from '~/components/Calculator/calculators/units/area'
+import {
+  volumeUnitsCommon as volumeUnits,
   defaultVolumeUnit,
-} from '~/components/Calculator/calculators/units'
-
-/* Re-export for consumers */
-export type { UnitOption }
-export { lengthUnits, areaUnits, volumeUnits }
+} from '~/components/Calculator/calculators/units/volume'
 
 export type CalculatorMode = 'area' | 'volume'
 

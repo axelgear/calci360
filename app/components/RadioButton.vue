@@ -1,15 +1,18 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface Props {
-  modelValue: string | number | boolean
-  value: string | number | boolean
+  modelValue: any
+  value: any
+  name: string
   label?: string
   disabled?: boolean
-  name?: string
 }
 
 const props = defineProps<Props>()
+
 const emit = defineEmits<{
-  'update:modelValue': [value: string | number | boolean]
+  'update:modelValue': [value: any]
 }>()
 
 const isChecked = computed(() => props.modelValue === props.value)
@@ -22,92 +25,115 @@ const handleChange = () => {
 </script>
 
 <template>
-  <label class="radio-button" :class="{ 'radio-button--disabled': disabled }">
-    <div class="radio-button__input-wrapper">
+  <label 
+    class="radio-button"
+    :class="{ 
+      'radio-button--checked': isChecked,
+      'radio-button--disabled': disabled 
+    }"
+  >
       <input
         type="radio"
         :name="name"
         :value="value"
         :checked="isChecked"
         :disabled="disabled"
+      class="radio-input"
         @change="handleChange"
-        class="radio-button__input"
       />
-      <div class="radio-button__custom" :class="{ 'radio-button__custom--checked': isChecked }">
-        <div class="radio-button__dot" />
-      </div>
-    </div>
-    <span v-if="label" class="radio-button__label">{{ label }}</span>
+    <span class="radio-control">
+      <span class="radio-dot"></span>
+    </span>
+    <span v-if="label || $slots.default" class="radio-label">
+      <slot>{{ label }}</slot>
+    </span>
   </label>
 </template>
 
 <style scoped lang="scss">
+/* Size variables */
+$radio-size: 18px;
+$dot-size: 8px;
+$border-width: 2px;
+$animation-duration: 0.2s;
+
 .radio-button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
   user-select: none;
+  position: relative;
   
   &--disabled {
-    opacity: 0.6;
     cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 
-.radio-button__input-wrapper {
-  position: relative;
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.radio-button__input {
+.radio-input {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
+  margin: 0;
+
+  &:focus-visible + .radio-control {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+  }
 }
 
-.radio-button__custom {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.radio-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $radio-size;
+  height: $radio-size;
+  border: $border-width solid rgba(var(--text-rgb), 0.3);
+  border-radius: 50%;
   background: var(--card);
-  border: 2px solid rgb(var(--accent-500-rgb) / 30%);
-  border-radius: 50%;
-  transition: all 0.2s;
+  transition: border-color $animation-duration, background-color $animation-duration;
+  flex-shrink: 0;
   
-  &:hover {
-    border-color: var(--accent-500);
+  .radio-button:hover:not(.radio-button--disabled) & {
+    border-color: rgba(var(--text-rgb), 0.4);
   }
   
-  &--checked {
+  .radio-button--checked & {
     border-color: var(--accent-500);
+    background: var(--accent-500);
+  }
     
-    .radio-button__dot {
-      transform: scale(1);
-      opacity: 1;
-    }
+  .radio-button:active:not(.radio-button--disabled) & {
+    transform: scale(0.95);
   }
 }
 
-.radio-button__dot {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--accent-500);
+.radio-dot {
+  width: $dot-size;
+  height: $dot-size;
   border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0);
+  background: white;
+  transform: scale(0);
   opacity: 0;
-  transition: all 0.2s;
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+
+  .radio-button--checked & {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-.radio-button__label {
+.radio-label {
+  font-size: 0.875rem;
   color: var(--text);
-  font-size: 0.9rem;
+  line-height: 1.5;
+
+  .radio-button--disabled & {
+    color: rgba(var(--text-rgb), 0.6);
 }
+}
+
+/* Removed keyframe animation to prevent delays - using transitions instead */
 </style>

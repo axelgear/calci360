@@ -1,0 +1,109 @@
+@use "theme/_colors" as *;
+
+/* CSS Variables for runtime theme switching */
+:root {
+  /* Accent colors */
+  --accent-primary: #{$accent-primary};
+  --accent-primary-rgb: #{$accent-primary-rgb};
+  
+  @each $name, $color in $accent-colors {
+    --#{$name}: #{$color};
+    @if $name == "accent-500" {
+      --#{$name}-rgb: #{$accent-primary-rgb};
+    }
+  }
+  
+  /* Grayscale colors */
+  @each $name, $color in $grayscale-colors {
+    --#{$name}: #{$color};
+  }
+  
+  /* Neutral colors */
+  @each $name, $color in $neutral-colors {
+    --#{$name}: #{$color};
+  }
+  
+  /* State colors */
+  @each $name, $color in $state-colors {
+    --#{$name}: #{$color};
+  }
+  
+  /* Shadows */
+  @each $name, $shadow in $shadows {
+    --#{$name}: #{$shadow};
+  }
+  
+  /* Text color RGB for opacity usage */
+  --text-rgb: 33, 33, 33;
+  
+  /* Additional colors for error pages */
+  --inset-bg: var(--gray-5);
+  --inset-bg-rgb: 250, 250, 250;
+  --main-bg-rgb: 255, 255, 255;
+  --icon-color: var(--gray-50);
+  --icon-color-rgb: 158, 158, 158;
+  --accent: var(--accent-500);
+  --accent-rgb: var(--accent-500-rgb);
+}
+
+/* Dark mode */
+html.dark,
+.dark {
+  color-scheme: dark;
+  
+  /* Dark mode grayscale */
+  @each $name, $color in $grayscale-colors-dark {
+    --#{$name}: #{$color};
+  }
+  
+  /* Dark mode neutral colors */
+  @each $name, $color in $neutral-colors-dark {
+    --#{$name}: #{$color};
+  }
+  
+  /* Text color RGB for dark mode */
+  --text-rgb: 255, 255, 255;
+  
+  /* Dark mode additional colors for error pages */
+  --inset-bg-rgb: 33, 33, 33;
+  --main-bg-rgb: 33, 33, 33;
+  --icon-color-rgb: 189, 189, 189;
+  
+  /* Adjusted shadows for dark mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Utility classes for colors */
+@each $name, $color in $accent-colors {
+  .#{$name} {
+    color: var(--#{$name});
+  }
+  
+  .bg-#{$name} {
+    background-color: var(--#{$name});
+  }
+  
+  .border-#{$name} {
+    border-color: var(--#{$name});
+  }
+}
+
+/* State color utilities */
+@each $name, $color in $state-colors {
+  .text-#{$name} {
+    color: var(--#{$name});
+  }
+  
+  .bg-#{$name} {
+    background-color: var(--#{$name});
+  }
+  
+  .border-#{$name} {
+    border-color: var(--#{$name});
+  }
+}

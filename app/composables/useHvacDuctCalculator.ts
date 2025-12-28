@@ -31,14 +31,16 @@ import {
   defaultInsulation,
   defaultExteriorCondition,
 } from '~/components/Calculator/calculators/hvac/ducts'
+import type { UnitOption } from '~/components/Calculator/calculators/units/types'
 import {
-  type UnitOption,
-  lengthUnitsCommon as lengthUnits,
+  lengthUnits,
   defaultLengthUnit,
+} from '~/components/Calculator/calculators/units/length'
+import {
   temperatureUnitsFull as temperatureUnits,
   toKelvin,
   fromKelvin,
-} from '~/components/Calculator/calculators/units'
+} from '~/components/Calculator/calculators/units/temperature'
 
 /* Airflow units (base: m³/s) */
 const airflowUnits: UnitOption[] = [
@@ -76,7 +78,7 @@ const heatTransferUnits: UnitOption[] = [
 ]
 
 /* Re-export for consumers */
-export { lengthUnits, temperatureUnits, airflowUnits, velocityUnits, thicknessUnits, thermalConductivityUnits, heatTransferUnits, insulationMaterials, ductDefinitions, exteriorConditions }
+export { temperatureUnits, airflowUnits, velocityUnits, thicknessUnits, thermalConductivityUnits, heatTransferUnits, insulationMaterials, ductDefinitions, exteriorConditions }
 
 /* Air properties at ~20°C */
 const AIR_DENSITY = 1.2 /* kg/m³ */

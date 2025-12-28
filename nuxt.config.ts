@@ -36,6 +36,10 @@ export default defineNuxtConfig({
     },
   },
 
+  css: [
+    '@/assets/styles/global.scss',
+  ],
+
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
     head: {
@@ -98,5 +102,8 @@ export default defineNuxtConfig({
     public: {
       googleTranslateKey: process.env.NUXT_PUBLIC_GOOGLE_TRANSLATE_KEY || 'AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520',
     },
+  },
+  devServer: {
+    port: 3005,
   },
 })

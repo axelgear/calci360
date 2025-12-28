@@ -1,61 +1,57 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from '#imports'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useNuxtApp } from '#app'
 
-const isLoading = ref(false)
 const progress = ref(0)
+const isLoading = ref(false)
+let progressInterval: NodeJS.Timeout | null = null
 
-let interval: NodeJS.Timeout | null = null
-
-const start = () => {
+const startLoading = () => {
   isLoading.value = true
   progress.value = 0
   
-  // Simulate progress
-  interval = setInterval(() => {
+  /* Simulate progress */
+  progressInterval = setInterval(() => {
     if (progress.value < 90) {
-      progress.value += Math.random() * 10
+      progress.value += Math.random() * 20
+      if (progress.value > 90) progress.value = 90
     }
   }, 200)
 }
 
-const finish = () => {
+const finishLoading = () => {
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
+  }
+  
   progress.value = 100
+  
   setTimeout(() => {
     isLoading.value = false
     progress.value = 0
-    if (interval) {
-      clearInterval(interval)
-      interval = null
-    }
   }, 300)
 }
 
-// Listen to route changes
-const router = useRouter()
-
 onMounted(() => {
-  router.beforeEach(() => {
-    start()
-  })
-
-  router.afterEach(() => {
-    finish()
-  })
+  const nuxtApp = useNuxtApp()
+  
+  nuxtApp.hook('page:start', startLoading)
+  nuxtApp.hook('page:finish', finishLoading)
 })
 
-onUnmounted(() => {
-  if (interval) {
-    clearInterval(interval)
+onBeforeUnmount(() => {
+  if (progressInterval) {
+    clearInterval(progressInterval)
   }
 })
 </script>
 
 <template>
-  <Transition name="fade">
+  <Transition name="loading">
     <div v-if="isLoading" class="page-loading-indicator">
       <div 
-        class="page-loading-indicator__bar" 
+        class="loading-bar"
         :style="{ width: `${progress}%` }"
       />
     </div>
@@ -69,25 +65,63 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 3px;
-  background: rgb(var(--accent-500-rgb) / 10%);
+  background: rgba(var(--accent-500-rgb), 0.1);
   z-index: 9999;
-  overflow: hidden;
+  pointer-events: none;
 }
 
-.page-loading-indicator__bar {
+.loading-bar {
   height: 100%;
   background: var(--accent-500);
   transition: width 0.2s ease-out;
-  box-shadow: 0 0 10px var(--accent-500);
+  box-shadow: 0 0 10px rgba(var(--accent-500-rgb), 0.5);
+  
+  /* Pulse animation */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: pulse 1.5s ease-in-out infinite;
+  }
 }
 
-.fade-enter-active,
-.fade-leave-active {
+/* Animations */
+.loading-enter-active,
+.loading-leave-active {
   transition: opacity 0.3s;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.loading-enter-from,
+.loading-leave-to {
   opacity: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-100px);
+  }
+  100% {
+    transform: translateX(100px);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar {
+    transition: none;
+    
+    &::after {
+      animation: none;
+    }
+  }
 }
 </style>

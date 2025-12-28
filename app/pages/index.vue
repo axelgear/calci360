@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useHead, useSeoMeta } from '#app'
 import { calculators } from '~/components/Calculator/calculators/index'
 import { isConverterConfig } from '~/components/Calculator/calculators/types'
 
@@ -59,7 +61,7 @@ const categories = computed<Category[]>(() => {
       id: name.toLowerCase().replace(/\s+/g, '-'),
       name,
       icon: categoryIcons[name] || 'calculate',
-      items,
+      items: items as CalculatorItem[],
     })
   }
 

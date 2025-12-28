@@ -1,172 +1,219 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface Props {
-  modelValue: boolean
+  modelValue?: boolean
   label?: string
-  labelOn?: string
-  labelOff?: string
   disabled?: boolean
-  size?: 'small' | 'medium' | 'large'
+  size?: 'sm' | 'md' | 'lg'
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  size: 'medium',
-  labelOn: 'On',
-  labelOff: 'Off',
+  modelValue: false,
+  disabled: false,
+  size: 'md'
 })
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
+const isOn = computed(() => props.modelValue)
+
 const toggle = () => {
   if (!props.disabled) {
     emit('update:modelValue', !props.modelValue)
   }
 }
+
+/* Size configurations */
+const sizeConfig = {
+  sm: { width: '34px', height: '20px', thumbSize: '14px' },
+  md: { width: '44px', height: '24px', thumbSize: '18px' },
+  lg: { width: '56px', height: '30px', thumbSize: '24px' }
+}
+
+const currentSize = computed(() => sizeConfig[props.size])
 </script>
 
 <template>
-  <label class="toggle-switch" :class="{ 'toggle-switch--disabled': disabled }">
-    <span v-if="label" class="toggle-switch__label">{{ label }}</span>
-    <div class="toggle-switch__wrapper">
-      <span class="toggle-switch__text toggle-switch__text--off">{{ labelOff }}</span>
+  <label 
+    class="toggle-switch"
+    :class="[
+      `toggle-switch--${size}`,
+      { 
+        'toggle-switch--on': isOn,
+        'toggle-switch--disabled': disabled 
+      }
+    ]"
+  >
+    <span v-if="label" class="toggle-label">{{ label }}</span>
       <button
         type="button"
         role="switch"
-        :aria-checked="modelValue"
+      :aria-checked="isOn"
         :disabled="disabled"
-        class="toggle-switch__track"
-        :class="[
-          `toggle-switch__track--${size}`,
-          { 'toggle-switch__track--on': modelValue }
-        ]"
-        @click="toggle"
+      class="toggle-control"
+      @click.prevent="toggle"
+      @keydown.space.prevent
+      @keyup.space.prevent="toggle"
+      @keyup.enter.prevent="toggle"
       >
-        <span class="toggle-switch__thumb" />
+      <span class="toggle-track"></span>
+      <span class="toggle-thumb"></span>
       </button>
-      <span class="toggle-switch__text toggle-switch__text--on">{{ labelOn }}</span>
-    </div>
   </label>
 </template>
 
 <style scoped lang="scss">
+/* Size variables */
+$width-sm: 34px;
+$height-sm: 20px;
+$thumb-sm: 14px;
+
+$width-md: 44px;
+$height-md: 24px;
+$thumb-md: 18px;
+
+$width-lg: 56px;
+$height-lg: 30px;
+$thumb-lg: 24px;
+
 .toggle-switch {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
+  cursor: pointer;
   user-select: none;
   
   &--disabled {
-    opacity: 0.6;
     cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
-.toggle-switch__label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.toggle-switch__wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.toggle-switch__text {
+.toggle-label {
   font-size: 0.875rem;
   font-weight: 500;
-  transition: color 0.2s;
-  
-  &--off {
     color: var(--text);
-    opacity: 0.6;
-    
-    .toggle-switch__track--on ~ & {
-      opacity: 0.4;
-    }
-  }
-  
-  &--on {
-    color: var(--accent-500);
-    opacity: 0.4;
-    
-    .toggle-switch__track--on ~ & {
-      opacity: 1;
-    }
-  }
 }
 
-.toggle-switch__track {
+.toggle-control {
   position: relative;
-  background: var(--card);
-  border: 2px solid rgb(var(--accent-500-rgb) / 30%);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.3s;
+  display: inline-block;
+  background: none;
+  border: none;
   padding: 0;
+  cursor: inherit;
+  touch-action: pan-y;
   
   &:focus-visible {
     outline: 2px solid var(--accent-500);
     outline-offset: 2px;
+    border-radius: 999px;
   }
   
   &:disabled {
     cursor: not-allowed;
   }
-  
-  /* Sizes */
-  &--small {
-    width: 2.5rem;
-    height: 1.5rem;
+}
+
+.toggle-track {
+  display: block;
+  background: rgba(var(--text-rgb), 0.2);
+  border-radius: 999px;
+  transition: background-color 0.2s;
     
-    .toggle-switch__thumb {
-      width: 1rem;
-      height: 1rem;
-    }
+  .toggle-switch--sm & {
+    width: $width-sm;
+    height: $height-sm;
   }
-  
-  &--medium {
-    width: 3rem;
-    height: 1.75rem;
     
-    .toggle-switch__thumb {
-      width: 1.25rem;
-      height: 1.25rem;
-    }
+  .toggle-switch--md & {
+    width: $width-md;
+    height: $height-md;
   }
-  
-  &--large {
-    width: 3.5rem;
-    height: 2rem;
     
-    .toggle-switch__thumb {
-      width: 1.5rem;
-      height: 1.5rem;
+  .toggle-switch--lg & {
+    width: $width-lg;
+    height: $height-lg;
     }
-  }
-  
-  /* On state */
-  &--on {
+
+  .toggle-switch--on & {
     background: var(--accent-500);
-    border-color: var(--accent-500);
+  }
     
-    .toggle-switch__thumb {
-      transform: translateX(100%);
-      background: white;
+  .toggle-switch--disabled & {
+    background: rgba(var(--text-rgb), 0.1);
     }
+
+  .toggle-switch--on.toggle-switch--disabled & {
+    background: rgba(var(--accent-500-rgb), 0.4);
   }
 }
 
-.toggle-switch__thumb {
+.toggle-thumb {
   position: absolute;
   top: 50%;
-  left: 0.125rem;
-  background: rgb(var(--accent-500-rgb) / 40%);
+  background: white;
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-50%);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgb(0 0 0 / 15%);
+
+  .toggle-switch--sm & {
+    width: $thumb-sm;
+    height: $thumb-sm;
+    left: 3px;
+  }
+
+  .toggle-switch--md & {
+    width: $thumb-md;
+    height: $thumb-md;
+    left: 3px;
+  }
+
+  .toggle-switch--lg & {
+    width: $thumb-lg;
+    height: $thumb-lg;
+    left: 3px;
+  }
+
+  .toggle-switch--on.toggle-switch--sm & {
+    transform: translateY(-50%) translateX(calc($width-sm - $thumb-sm - 6px));
+  }
+
+  .toggle-switch--on.toggle-switch--md & {
+    transform: translateY(-50%) translateX(calc($width-md - $thumb-md - 6px));
+  }
+
+  .toggle-switch--on.toggle-switch--lg & {
+    transform: translateY(-50%) translateX(calc($width-lg - $thumb-lg - 6px));
+  }
+
+  .toggle-switch:hover:not(.toggle-switch--disabled) & {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .toggle-switch:active:not(.toggle-switch--disabled) & {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  .toggle-switch--on:active:not(.toggle-switch--disabled).toggle-switch--sm & {
+    transform: translateY(-50%) translateX(calc($width-sm - $thumb-sm - 6px)) scale(0.95);
+  }
+
+  .toggle-switch--on:active:not(.toggle-switch--disabled).toggle-switch--md & {
+    transform: translateY(-50%) translateX(calc($width-md - $thumb-md - 6px)) scale(0.95);
+  }
+
+  .toggle-switch--on:active:not(.toggle-switch--disabled).toggle-switch--lg & {
+    transform: translateY(-50%) translateX(calc($width-lg - $thumb-lg - 6px)) scale(0.95);
+  }
+
+  .toggle-switch--disabled & {
+    background: rgba(var(--text-rgb), 0.5);
+    box-shadow: none;
+  }
 }
 </style>

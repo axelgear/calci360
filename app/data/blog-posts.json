@@ -1,0 +1,241 @@
+{
+  "posts": [
+    {
+      "id": "1",
+      "slug": "gdt-fundamentals",
+      "title": "GD&T Fundamentals: Introduction to Geometric Dimensioning and Tolerancing",
+      "description": "Master the basics of GD&T according to ASME Y14.5-2018. Learn about feature control frames, datums, and geometric tolerances.",
+      "date": "2025-01-01",
+      "category": "gdt",
+      "tags": ["GD&T", "ASME Y14.5", "Fundamentals", "Engineering Drawing"],
+      "readTime": "25 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": true,
+      "parent": null,
+      "children": ["2", "3", "4"],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" }
+      ]
+    },
+    {
+      "id": "2",
+      "slug": "gdt-symbols-overview",
+      "title": "GD&T Symbols and Their Meanings",
+      "description": "Comprehensive guide to all 14 geometric characteristic symbols, their meanings, and applications in engineering drawings.",
+      "date": "2025-01-02",
+      "category": "gdt",
+      "tags": ["GD&T", "Symbols", "Geometric Characteristics", "ASME Y14.5"],
+      "readTime": "30 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "1",
+      "children": ["5", "6", "7", "8", "9"],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" }
+      ]
+    },
+    {
+      "id": "3",
+      "slug": "feature-control-frames",
+      "title": "Feature Control Frames: Structure and Interpretation",
+      "description": "Learn how to read and create feature control frames, including tolerance zones, modifiers, and datum references.",
+      "date": "2025-01-03",
+      "category": "gdt",
+      "tags": ["GD&T", "Feature Control Frame", "Tolerance", "ASME Y14.5"],
+      "readTime": "20 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "1",
+      "children": ["10", "11"],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" }
+      ]
+    },
+    {
+      "id": "4",
+      "slug": "datum-system",
+      "title": "Understanding Datum Systems",
+      "description": "Master the concept of datums, datum features, and datum reference frames in GD&T.",
+      "date": "2025-01-04",
+      "category": "gdt",
+      "tags": ["GD&T", "Datum", "Reference Frame", "ASME Y14.5"],
+      "readTime": "25 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "1",
+      "children": ["12", "13", "14"],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" }
+      ]
+    },
+    {
+      "id": "5",
+      "slug": "form-tolerances",
+      "title": "Form Tolerances: Straightness, Flatness, Circularity, and Cylindricity",
+      "description": "Deep dive into form tolerances that control the shape of features without regard to orientation or location.",
+      "date": "2025-01-05",
+      "category": "gdt",
+      "tags": ["GD&T", "Form Tolerance", "Straightness", "Flatness", "ASME Y14.5"],
+      "readTime": "35 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "2",
+      "children": [],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" },
+        { "label": "GD&T Symbols", "path": "/blog/2/gdt-symbols-overview" }
+      ]
+    },
+    {
+      "id": "6",
+      "slug": "orientation-tolerances",
+      "title": "Orientation Tolerances: Perpendicularity, Angularity, and Parallelism",
+      "description": "Understanding orientation controls that relate features to datum reference frames.",
+      "date": "2025-01-06",
+      "category": "gdt",
+      "tags": ["GD&T", "Orientation", "Perpendicularity", "Angularity", "Parallelism"],
+      "readTime": "30 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "2",
+      "children": [],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" },
+        { "label": "GD&T Symbols", "path": "/blog/2/gdt-symbols-overview" }
+      ]
+    },
+    {
+      "id": "7",
+      "slug": "location-tolerances",
+      "title": "Location Tolerances: Position, Concentricity, and Symmetry",
+      "description": "Master location controls including true position, the most versatile GD&T symbol.",
+      "date": "2025-01-07",
+      "category": "gdt",
+      "tags": ["GD&T", "Location", "Position", "True Position", "ASME Y14.5"],
+      "readTime": "40 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": true,
+      "parent": "2",
+      "children": [],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" },
+        { "label": "GD&T Symbols", "path": "/blog/2/gdt-symbols-overview" }
+      ]
+    },
+    {
+      "id": "8",
+      "slug": "profile-tolerances",
+      "title": "Profile Tolerances: Profile of a Line and Profile of a Surface",
+      "description": "Comprehensive guide to profile tolerances, the most powerful GD&T controls.",
+      "date": "2025-01-08",
+      "category": "gdt",
+      "tags": ["GD&T", "Profile", "Surface", "Line", "ASME Y14.5"],
+      "readTime": "35 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "2",
+      "children": [],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" },
+        { "label": "GD&T Symbols", "path": "/blog/2/gdt-symbols-overview" }
+      ]
+    },
+    {
+      "id": "9",
+      "slug": "runout-tolerances",
+      "title": "Runout Tolerances: Circular and Total Runout",
+      "description": "Understanding runout controls for rotating parts and assemblies.",
+      "date": "2025-01-09",
+      "category": "gdt",
+      "tags": ["GD&T", "Runout", "Circular Runout", "Total Runout", "ASME Y14.5"],
+      "readTime": "25 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "2",
+      "children": [],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" },
+        { "label": "GD&T Symbols", "path": "/blog/2/gdt-symbols-overview" }
+      ]
+    },
+    {
+      "id": "10",
+      "slug": "material-condition-modifiers",
+      "title": "Material Condition Modifiers: MMC, LMC, and RFS",
+      "description": "Learn about Maximum Material Condition, Least Material Condition, and Regardless of Feature Size.",
+      "date": "2025-01-10",
+      "category": "gdt",
+      "tags": ["GD&T", "MMC", "LMC", "RFS", "Material Condition"],
+      "readTime": "30 min",
+      "author": {
+        "name": "Engineering Team",
+        "role": "Technical Writers"
+      },
+      "featured": false,
+      "parent": "3",
+      "children": [],
+      "breadcrumbs": [
+        { "label": "GD&T Series", "path": "/blog/category/gdt" },
+        { "label": "GD&T Fundamentals", "path": "/blog/1/gdt-fundamentals" },
+        { "label": "Feature Control Frames", "path": "/blog/3/feature-control-frames" }
+      ]
+    }
+  ],
+  "categories": {
+    "gdt": {
+      "name": "Geometric Dimensioning & Tolerancing",
+      "description": "Comprehensive guides on GD&T principles, symbols, and applications",
+      "icon": "straighten"
+    },
+    "metrology": {
+      "name": "Metrology",
+      "description": "Measurement science and inspection techniques",
+      "icon": "science"
+    },
+    "manufacturing": {
+      "name": "Manufacturing",
+      "description": "Manufacturing processes and best practices",
+      "icon": "precision_manufacturing"
+    },
+    "calculations": {
+      "name": "Engineering Calculations",
+      "description": "Mathematical methods and formulas for engineering",
+      "icon": "calculate"
+    }
+  }
+}

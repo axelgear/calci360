@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { inject } from '@vercel/analytics'
 import { useHead, onMounted } from '#imports'
+import { useUiTranslateStore } from '@/stores/ui-translate'
 
 // Get the host URL
 const host = typeof window !== 'undefined' ? window.location.host : 'calculator.app'
@@ -49,9 +50,15 @@ useHead({
   ],
 })
 
-// Initialize Vercel Analytics
+// Initialize UI store
+const uiStore = useUiTranslateStore()
+
+// Initialize Vercel Analytics and UI settings
 onMounted(() => {
   inject()
+  
+  // Initialize language from cookies (theme is handled by plugins)
+  uiStore.initLanguageFromCookie()
   
   // Log a welcome message in development
   if (process.env.NODE_ENV === 'development') {
@@ -84,150 +91,29 @@ if (typeof window !== 'undefined') {
 </template>
 
 <style lang="scss">
-:root {
-  --accent-300: #ffdfe7;
-  --accent-500: #00a2d3;
-  --accent-500-rgb: 0 162 211;
-  --hover-overlay: rgb(0 0 0 / 5%);
-  --hover-overlay-light: rgb(255 255 255 / 15%);
-  --card: rgb(255 255 255 / 10%);
-  --ripple: var(--hover-overlay);
-  --main-bg: white;
-  --neutral: #797173;
-  --text: black;
-  background-color: var(--main-bg);
+@use "@/assets/styles/global.scss";
+@use "@/assets/styles/_mixins.scss" as *;
 
-  @include dark {
-    --hover-overlay: rgb(255 255 255 / 8%);
-    --card: rgb(255 255 255 / 5%);
-    --main-bg: #212121;
-    --neutral: #e5e4e4;
-    --text: white;
-  }
-}
-
-*,
-::before,
-::after {
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'liga';
-}
-
-html,
-body {
-  overscroll-behavior: none;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
-
-  @media (prefers-reduced-motion: reduce) {
-    scroll-behavior: auto;
-  }
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-size: 1rem;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Roboto Flex', Roboto, Inter, 'Segoe UI Variable Display', 'Segoe UI', Ubuntu,
-    Cantarell, 'Noto Sans CJK SC', 'Noto Sans SC', 'Source Han Sans CN', 'Microsoft YaHei UI', 'Microsoft YaHei',
-    system-ui, sans-serif;
-  -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
-
-  @include phone {
-    font-size: 0.95rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    transition-duration: 0s !important;
-    animation-duration: 0s !important;
-  }
-}
-
-/* reset */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
-  margin: 0;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family:
-    Montserrat,
-    -apple-system,
-    BlinkMacSystemFont,
-    system-ui,
-    sans-serif;
-}
-
-a {
-  text-decoration: none;
-
-  /* Minimum touch target for mobile accessibility */
-  @include phone {
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-  }
-}
-
-/* Override for inline links that shouldn't have min-height */
-p a,
-li a,
-span a {
-  @include phone {
-    min-height: auto;
-    display: inline;
-  }
-}
-
+/* App-specific styles */
 .nav-bg {
   position: sticky;
   width: 100%;
   height: 3rem;
   background-color: var(--accent-500);
-  box-shadow: 0 0 1.5rem 0 rgb(var(--accent-500-rgb) / 30%);
+  box-shadow: 0 0 1.5rem 0 rgba(var(--accent-500-rgb), 0.3);
 }
 
-/* .page-enter-active {
-  transition: all 0.6s cubic-bezier(0.1, 0.9, 0.2, 1);
-} */
-
+/* Page transitions */
 .page-leave-active {
   transition: all 0.2s cubic-bezier(0.95, 0.05, 0.795, 0.035);
 }
-
-/* .page-enter-from {
-  transform: translateY(8rem);
-  opacity: 0;
-} */
 
 .page-leave-to {
   transform: translateY(-4rem);
   opacity: 0;
 }
 
-/* fallback */
+/* Material Icons fallback */
 @font-face {
   font-weight: 400;
   font-family: 'Material Icons Round';
@@ -252,5 +138,24 @@ span a {
   font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
   user-select: none;
+}
+
+/* Mobile link adjustments */
+a {
+  @include phone {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Override for inline links */
+p a,
+li a,
+span a {
+  @include phone {
+    min-height: auto;
+    display: inline;
+  }
 }
 </style>

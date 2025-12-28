@@ -1,0 +1,20 @@
+/* Theme Functions */
+@use "sass:color";
+
+/* Color mixing function */
+@function c($color, $opacity: null) {
+  @if $opacity {
+    @return rgba($color, $opacity);
+  }
+  @return $color;
+}
+
+/* Darken function */
+@function darken($color, $amount) {
+  @return color.mix(black, $color, $amount);
+}
+
+/* Lighten function */
+@function lighten($color, $amount) {
+  @return color.mix(white, $color, $amount);
+}

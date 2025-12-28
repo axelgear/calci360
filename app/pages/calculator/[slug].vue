@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute, useHead, useSeoMeta, createError } from '#app'
+import { definePageMeta } from '#imports'
 import { getCalculator, calculators } from '~/components/Calculator/calculators/index'
 import { isConverterConfig, isGeometryCalculatorConfig, isMetalWeightCalculatorConfig, isHvacDuctCalculatorConfig, isDuctSizingCalculatorConfig, isBendingStressCalculatorConfig } from '~/components/Calculator/calculators/types'
 import type { GeometryCalculatorConfig, ConverterConfig, MetalWeightCalculatorConfig, HvacDuctCalculatorConfig, DuctSizingCalculatorConfig, BendingStressCalculatorConfig } from '~/components/Calculator/calculators/types'
