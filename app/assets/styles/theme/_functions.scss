@@ -1,5 +1,6 @@
 /* Theme Functions */
 @use "sass:color";
+@use "sass:math";
 
 /* Color mixing function */
 @function c($color, $opacity: null) {
@@ -17,4 +18,22 @@
 /* Lighten function */
 @function lighten($color, $amount) {
   @return color.mix(white, $color, $amount);
+}
+
+/* Map value from one range to another */
+@function map($x, $min, $max, $a, $b, $css-calc: false) {
+  @if not $css-calc {
+    @return calc(($b - $a) * ($x - $min) / ($max - $min)) + $a;
+  } @else {
+    @return calc((($b - $a) * ($x - $min) / ($max - $min)) + $a);
+  }
+}
+
+/* Generate random number between two values */
+@function rand-between($min, $max, $is-int: true) {
+  @if $is-int {
+    @return math.random($max + 1 - $min) + $min;
+  } @else {
+    @return math.random() * ($max - $min) + $min;
+  }
 }
