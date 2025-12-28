@@ -16,7 +16,7 @@ const tabsContext = inject(TabsContextKey)
 const isActive = computed(() => {
   if (!tabsContext) {
     console.warn(`TabPanel ${props.id}: No tabs context found`)
-    return false
+    return true // Show all panels if no context (for debugging)
   }
   return tabsContext.activeTab.value === props.id
 })
@@ -41,10 +41,15 @@ const shouldRender = computed(() => {
     v-if="isActive"
     :id="`panel-${id}`"
     class="tab-panel"
+    :class="{ 'tab-panel--inactive': !isActive }"
     role="tabpanel"
     :aria-labelledby="`tab-${id}`"
     :aria-hidden="!isActive"
   >
+    <!-- Debug info -->
+    <div v-if="!tabsContext" style="background: red; color: white; padding: 10px;">
+      TabPanel {{ id }}: No context found!
+    </div>
     <div v-if="shouldRender" class="tab-panel-content">
       <slot />
     </div>

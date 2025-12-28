@@ -106,14 +106,18 @@ const symbolCategories = [
     </div>
 
     <!-- Tab Content using Tabs component -->
-    <Tabs :tabs="[
+    <Tabs 
+      :tabs="[
         { id: 'introduction', label: 'Introduction', icon: 'info' },
         { id: 'history', label: 'History & Standards', icon: 'history' },
         { id: 'principles', label: 'Basic Principles', icon: 'foundation' },
         { id: 'symbols', label: 'Symbol Overview', icon: 'category' },
         { id: 'benefits', label: 'Benefits', icon: 'trending_up' },
         { id: 'examples', label: 'Examples', icon: 'view_in_ar' }
-      ]" v-model="activeTabId" variant="boxed">
+      ]" 
+      v-model="activeTabId" 
+      variant="boxed"
+    >
       <!-- Introduction Tab -->
       <TabPanel id="introduction">
         <h2 id="what-is-gdt">{{ t('What is GD&T?') }}</h2>
