@@ -208,11 +208,11 @@ const useNoop = () => {}
 				@for $i from 1 through $stroke-count {
 					rect:nth-of-type(#{$i}) {
 						// $depth: calc((rand-between(1, $stroke-count) - 1) / 2 + 1);
-						$depth: (($stroke-count - $i) / 2 + 1);
-						$transparency: percentage(map($depth, 1, ($stroke-count / 2), 0.1, 0.6));
+						$depth: (math.div($stroke-count - $i, 2) + 1);
+						$transparency: #{map($depth, 1, math.div($stroke-count, 2), 0.1, 0.6) * 100}%;
 						$reversed: math.random() <= 0.5;
-						$height: (rand-between(100, 600) * 1px / $depth);
-						$stroke-width: ($base-stroke-width / $depth);
+						$height: math.div(rand-between(100, 600) * 1px, $depth);
+						$stroke-width: math.div($base-stroke-width, $depth);
 						--height: #{$height};
 						--stroke-width: #{$stroke-width};
 						transition: $fallback-transitions, x 0s; // Avoid sudden transition changes in x direction during hydration.
