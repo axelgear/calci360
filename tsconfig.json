@@ -1,4 +1,31 @@
 {
 	// https://nuxt.com/docs/guide/concepts/typescript
-	"extends": "./.nuxt/tsconfig.json"
+	"extends": "./.nuxt/tsconfig.json",
+	"compilerOptions": {
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"moduleDetection": "force",
+		"isolatedModules": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": [
+			"@nuxt/types",
+			"@nuxtjs/i18n",
+			"@types/node"
+		]
+	},
+	"include": [
+		"./types/**/*",
+		"./app/**/*",
+		"./content/**/*",
+		"./public/**/*",
+		"./*.ts",
+		"./*.vue"
+	]
 }

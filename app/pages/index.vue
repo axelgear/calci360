@@ -171,6 +171,38 @@ const converterCount = computed(() => {
         </div>
       </div>
     </section>
+
+    <!-- Blog Section -->
+    <section class="blog-section">
+      <h2 class="section-title">
+        <span class="material-icons">auto_stories</span>
+        Engineering Insights
+      </h2>
+      <p class="blog-intro">
+        Explore our technical articles covering GD&T, metrology, manufacturing processes, and engineering calculations.
+      </p>
+      <div class="blog-preview">
+        <NuxtLink to="/blog/1/gdt-anatomy" class="blog-card featured">
+          <div class="blog-badge">Featured</div>
+          <span class="material-icons blog-icon">straighten</span>
+          <h3>Anatomy of GD&T Annotation</h3>
+          <p>A comprehensive guide to interpreting Feature Control Frames and Geometric Tolerancing symbols.</p>
+          <span class="read-more">
+            Read Article
+            <span class="material-icons">arrow_forward</span>
+          </span>
+        </NuxtLink>
+        <NuxtLink to="/blog" class="blog-card explore">
+          <span class="material-icons blog-icon">explore</span>
+          <h3>Explore All Articles</h3>
+          <p>Browse our complete library of technical articles and engineering guides.</p>
+          <span class="read-more">
+            View Blog
+            <span class="material-icons">arrow_forward</span>
+          </span>
+        </NuxtLink>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -444,7 +476,7 @@ h1 {
 
 /* Features Section */
 .features-section {
-  margin-bottom: 2rem;
+  margin-bottom: 4rem;
 }
 
 .features-grid {
@@ -478,6 +510,111 @@ h1 {
     color: var(--text);
     opacity: 0.75;
     line-height: 1.5;
+  }
+}
+
+/* Blog Section */
+.blog-section {
+  margin-bottom: 2rem;
+  
+  .blog-intro {
+    font-size: 1.1rem;
+    color: var(--text);
+    opacity: 0.85;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+  }
+}
+
+.blog-preview {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  
+  @include phone {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blog-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background: var(--card);
+  border: 1px solid rgb(var(--accent-500-rgb) / 10%);
+  border-radius: 1rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.3s;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 15%);
+    border-color: var(--accent-500);
+    
+    .read-more {
+      gap: 0.75rem;
+    }
+  }
+  
+  &.featured {
+    background: linear-gradient(135deg, rgb(var(--accent-500-rgb) / 8%) 0%, var(--card) 100%);
+  }
+  
+  .blog-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--accent-500);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .blog-icon {
+    font-size: 3rem;
+    color: var(--accent-500);
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: var(--text);
+    
+    @include phone {
+      font-size: 1.25rem;
+    }
+  }
+  
+  p {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text);
+    opacity: 0.75;
+    margin: 0 0 1.5rem;
+  }
+  
+  .read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--accent-500);
+    font-weight: 600;
+    transition: gap 0.2s;
+    
+    .material-icons {
+      font-size: 1.1rem;
+    }
   }
 }
 </style>

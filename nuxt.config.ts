@@ -6,6 +6,12 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  typescript: {
+    strict: true,
+    shim: false,
+    includeWorkspace: true,
+  },
+
   modules: [
     '@nuxt/image',
     '@nuxt/content',

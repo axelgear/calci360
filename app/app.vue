@@ -1,13 +1,78 @@
 <script setup lang="ts">
 import { inject } from '@vercel/analytics'
+import { useHead, onMounted } from '#imports'
 
+// Get the host URL
+const host = typeof window !== 'undefined' ? window.location.host : 'calculator.app'
+
+// Set up head configuration with comprehensive meta tags
 useHead({
-  titleTemplate: '%s - Free Online Calculator',
+  titleTemplate: (titleChunk: string | undefined) => {
+    return titleChunk ? `${titleChunk} - Free Online Calculator` : 'Free Online Calculator - Engineering & Scientific Tools'
+  },
+  meta: [
+    { charset: 'UTF-8' },
+    { 'http-equiv': 'X-UA-Compatible', content: 'IE=Edge,chrome=1' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+    { name: 'renderer', content: 'webkit' },
+    { name: 'description', content: 'Free online calculators for engineering, science, and mathematics. GD&T tools, unit converters, geometry calculators, and more.' },
+    { name: 'keywords', content: 'calculator,engineering,GD&T,geometric dimensioning,tolerancing,unit converter,geometry,mathematics,science,metrology' },
+    // Apple-specific
+    { name: 'apple-mobile-web-app-title', content: 'Calculator' },
+    { name: 'apple-mobile-web-app-capable', content: 'yes' },
+    { name: 'apple-touch-fullscreen', content: 'yes' },
+    { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+    { name: 'format-detection', content: 'telephone=no' },
+    { name: 'format-detection', content: 'email=no' },
+    // Anti-transform
+    { 'http-equiv': 'Cache-Control', content: 'no-siteapp' },
+    { name: 'referrer', content: 'no-referrer' },
+    // Open Graph
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'Free Online Calculator' },
+    { property: 'og:title', content: 'Free Online Calculator' },
+    { property: 'og:description', content: 'Free online calculators for engineering, science, and mathematics.' },
+    { property: 'og:image', content: `https://${host}/og-image.png` },
+    { property: 'og:url', content: `https://${host}` },
+    // Twitter
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:site', content: 'Free Online Calculator' },
+    { name: 'twitter:title', content: 'Free Online Calculator' },
+    { name: 'twitter:description', content: 'Free online calculators for engineering, science, and mathematics.' },
+    { name: 'twitter:image', content: `https://${host}/og-image.png` },
+  ],
+  link: [
+    { rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
+    { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+    { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+    { rel: 'manifest', href: '/manifest.json' },
+  ],
 })
 
+// Initialize Vercel Analytics
 onMounted(() => {
   inject()
+  
+  // Log a welcome message in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      '%cFree Online Calculator%c\nPrecision tools for engineering and science!\n',
+      'font-size: 24px; font-weight: bold; color: #00a2d3;',
+      'color: #00a2d3;'
+    )
+  }
 })
+
+// Global error handler
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error)
+  })
+  
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason)
+  })
+}
 </script>
 
 <template>

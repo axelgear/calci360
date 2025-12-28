@@ -136,6 +136,10 @@ watch(
         <span class="material-icons">calculate</span>
         {{ hydrated ? t('Calculators') : 'Calculators' }}
       </NuxtLink>
+      <NuxtLink to="/blog">
+        <span class="material-icons">auto_stories</span>
+        {{ hydrated ? t('Blog') : 'Blog' }}
+      </NuxtLink>
       <NuxtLink to="/metrology">
         <span class="material-icons">menu_book</span>
         {{ hydrated ? t('SI Reference') : 'SI Reference' }}

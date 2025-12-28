@@ -1,3 +1,6 @@
+import { ref, computed, reactive, watch } from 'vue'
+import type { Ref } from 'vue'
+
 /**
  * HVAC Duct Temperature Loss Calculator Composable
  * 
@@ -108,7 +111,7 @@ export function useHvacDuctCalculator(config: Ref<HvacDuctCalculatorConfig>) {
   }, { immediate: true })
 
   /* Convert when unit changes */
-  watch(thermalConductivityUnit, (newUnit, oldUnit) => {
+  watch(thermalConductivityUnit, (newUnit: string, oldUnit: string) => {
     const oldUnitObj = thermalConductivityUnits.find(u => u.id === oldUnit)
     const newUnitObj = thermalConductivityUnits.find(u => u.id === newUnit)
     if (oldUnitObj && newUnitObj) {
@@ -166,7 +169,7 @@ export function useHvacDuctCalculator(config: Ref<HvacDuctCalculatorConfig>) {
   }, { immediate: true })
 
   /* Convert hInside when unit changes */
-  watch(hInsideUnit, (newUnit, oldUnit) => {
+  watch(hInsideUnit, (newUnit: string, oldUnit: string) => {
     const oldUnitObj = heatTransferUnits.find(u => u.id === oldUnit)
     const newUnitObj = heatTransferUnits.find(u => u.id === newUnit)
     if (oldUnitObj && newUnitObj) {
@@ -176,7 +179,7 @@ export function useHvacDuctCalculator(config: Ref<HvacDuctCalculatorConfig>) {
   })
 
   /* Convert hOutside when unit changes */
-  watch(hOutsideUnit, (newUnit, oldUnit) => {
+  watch(hOutsideUnit, (newUnit: string, oldUnit: string) => {
     const oldUnitObj = heatTransferUnits.find(u => u.id === oldUnit)
     const newUnitObj = heatTransferUnits.find(u => u.id === newUnit)
     if (oldUnitObj && newUnitObj) {
