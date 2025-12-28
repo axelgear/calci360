@@ -73,6 +73,7 @@ const useNoop = () => {}
 @use "sass:math";
 @use "~/assets/styles/_mixins" as *;
 @use "~/assets/styles/_error-page-mixins" as *;
+@use "~/assets/styles/theme/_functions" as functions;
 
 	$bpm: 132;
 	$beat: calc(60s / $bpm);
@@ -209,9 +210,9 @@ const useNoop = () => {}
 					rect:nth-of-type(#{$i}) {
 						// $depth: calc((rand-between(1, $stroke-count) - 1) / 2 + 1);
 						$depth: (math.div($stroke-count - $i, 2) + 1);
-						$transparency: #{map($depth, 1, math.div($stroke-count, 2), 0.1, 0.6) * 100}%;
+						$transparency: #{functions.map($depth, 1, math.div($stroke-count, 2), 0.1, 0.6) * 100}%;
 						$reversed: math.random() <= 0.5;
-						$height: math.div(rand-between(100, 600) * 1px, $depth);
+						$height: math.div(functions.rand-between(100, 600) * 1px, $depth);
 						$stroke-width: math.div($base-stroke-width, $depth);
 						--height: #{$height};
 						--stroke-width: #{$stroke-width};

@@ -23,7 +23,7 @@
 /* Map value from one range to another */
 @function map($x, $min, $max, $a, $b, $css-calc: false) {
   @if not $css-calc {
-    @return (($b - $a) * ($x - $min) / ($max - $min)) + $a;
+    @return math.div(($b - $a) * ($x - $min), ($max - $min)) + $a;
   } @else {
     @return calc((($b - $a) * ($x - $min) / ($max - $min)) + $a);
   }
